@@ -1,4 +1,4 @@
-# CloudShell package repo template
+# CloudShell Checkpoint
 
 [![Build status](https://travis-ci.org/QualiSystems/cloudshell-package-repo-template.svg?branch=dev)](https://travis-ci.org/QualiSystems/cloudshell-package-repo-template)
 [![codecov](https://codecov.io/gh/QualiSystems/cloudshell-package-repo-template/branch/dev/graph/badge.svg)](https://codecov.io/gh/QualiSystems/cloudshell-package-repo-template)
