@@ -1,0 +1,28 @@
+repos:
+# todo uncomment this when will be isort version compatible with black
+#  - repo: https://github.com/pre-commit/mirrors-isort
+#    rev: master
+#    hooks:
+#      - id: isort
+#        language_version: python3.7
+  - repo: https://github.com/python/black
+    rev: stable
+    hooks:
+      - id: black
+        language_version: python3.7
+        exclude: '/mibs'
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: master
+    hooks:
+      - id: flake8
+        additional_dependencies: [
+          # todo remove this after fixing flake8-docstring
+          'pydocstyle<4.0.0',
+          flake8-docstrings,
+          flake8-builtins,
+          flake8-comprehensions,
+          flake8-print,
+          flake8-eradicate,
+        ]
+        language_version: python3.7
+        exclude: '/mibs'
