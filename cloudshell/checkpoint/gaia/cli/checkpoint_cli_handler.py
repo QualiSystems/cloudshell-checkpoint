@@ -7,7 +7,7 @@ from cloudshell.cli.session.ssh_session import SSHSession
 from cloudshell.cli.session.telnet_session import TelnetSession
 from cloudshell.devices.cli_handler_impl import CliHandlerImpl
 
-from cloudshell.checkpoint.gaia.cli.checkpoint_command_modes import EnableCommandMode, DefaultCommandMode
+from cloudshell.checkpoint.gaia.cli.checkpoint_command_modes import MaintenanceCommandMode, EnableCommandMode, ExpertCommandMode
 from cloudshell.checkpoint.gaia.sessions.console_ssh_session import ConsoleSSHSession
 from cloudshell.checkpoint.gaia.sessions.console_telnet_session import ConsoleTelnetSession
 
@@ -15,11 +15,11 @@ from cloudshell.checkpoint.gaia.sessions.console_telnet_session import ConsoleTe
 class CheckpointCliHandler(CliHandlerImpl):
     def __init__(self, cli, resource_config, logger, api):
         super(CheckpointCliHandler, self).__init__(cli, resource_config, logger, api)
-        self.modes = CommandModeHelper.create_command_mode()
+        self.modes = CommandModeHelper.create_command_mode(resource_config, api)
 
     @property
     def default_mode(self):
-        return self.modes[DefaultCommandMode]
+        return self.modes[MaintenanceCommandMode]
 
     @property
     def enable_mode(self):
@@ -27,7 +27,7 @@ class CheckpointCliHandler(CliHandlerImpl):
 
     @property
     def config_mode(self):
-        return self.modes[EnableCommandMode]
+        return self.modes[ExpertCommandMode]
 
     def _console_ssh_session(self):
         console_port = int(self.resource_config.console_port)
