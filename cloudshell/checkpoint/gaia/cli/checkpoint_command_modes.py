@@ -46,7 +46,7 @@ class EnableCommandMode(CommandMode):
 
 
 class ExpertCommandMode(CommandMode):
-    PROMPT = r'>\s*$'
+    PROMPT = r'^\[Expert.*#\s*$'
     ENTER_COMMAND = 'expert'
     EXIT_COMMAND = 'exit'
 
