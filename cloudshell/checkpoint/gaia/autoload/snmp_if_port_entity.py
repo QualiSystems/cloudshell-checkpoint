@@ -1,16 +1,15 @@
 import re
 
-from cloudshell.snmp.autoload.constants.port_constants import PORT_TYPE, PORT_SPEED, PORT_MTU, PORT_MAC, PORT_AUTO_NEG, \
-    PORT_ADJACENT_REM_PORT_DESCR
-from cloudshell.snmp.autoload.domain.if_entity.snmp_if_entity import SnmpIfEntity
+from cloudshell.checkpoint.gaia.autoload import port_constants
+from cloudshell.checkpoint.gaia.autoload.snmp_if_entity import SnmpIfEntity
 
 
 class SnmpIfPort(SnmpIfEntity):
     IF_TYPE_REPLACE_PATTERN = re.compile("^[/']|[/']$")
     ADJACENT_TEMPLATE = '{remote_host} through {remote_port}'
 
-    def __init__(self, snmp_handler, logger, port_name_response, port_attributes_snmp_tables):
-        super(SnmpIfPort, self).__init__(snmp_handler, logger, port_name_response, port_attributes_snmp_tables)
+    def __init__(self, snmp_handler, logger, index, port_attributes_snmp_tables):
+        super(SnmpIfPort, self).__init__(snmp_handler, logger, index, port_attributes_snmp_tables)
         self._snmp = snmp_handler
         self._port_attributes_snmp_tables = port_attributes_snmp_tables
         self._logger = logger
@@ -26,27 +25,27 @@ class SnmpIfPort(SnmpIfEntity):
     def if_type(self):
         if not self._if_type:
             self._if_type = "other"
-            if_type = self._snmp.get_property(PORT_TYPE.get_snmp_mib_oid(self.if_index))
-            if if_type and if_type.safe_value:
-                self._if_type = if_type.safe_value.replace("'", "")
+            if_type = self._snmp.get_property(*(port_constants.PORT_TYPE + (self.if_index,)))
+            if if_type and if_type:
+                self._if_type = if_type.replace("'", "")
         return self._if_type
 
     @property
     def if_speed(self):
         if not self._if_speed:
-            self._if_speed = self._snmp.get_property(PORT_SPEED.get_snmp_mib_oid(self.if_index)) or 0
+            self._if_speed = self._snmp.get_property(*(port_constants.PORT_SPEED + (self.if_index,)))
         return self._if_speed
 
     @property
     def if_mtu(self):
         if not self._if_mtu:
-            self._if_mtu = self._snmp.get_property(PORT_MTU.get_snmp_mib_oid(self.if_index)) or 0
+            self._if_mtu = self._snmp.get_property(*(port_constants.PORT_MTU + (self.if_index,)))
         return self._if_mtu
 
     @property
     def if_mac(self):
         if not self._if_mac:
-            self._if_mac = self._snmp.get_property(PORT_MAC.get_snmp_mib_oid(self.if_index))
+            self._if_mac = self._snmp.get_property(*(port_constants.PORT_MAC + (self.if_index,)))
         return self._if_mac
 
     @property
@@ -86,8 +85,8 @@ class SnmpIfPort(SnmpIfEntity):
                     for port_id, rem_table in self._port_attributes_snmp_tables.lldp_remote_table.items():
                         if key in port_id.split("."):
                             remote_sys_name = rem_table.get('lldpRemSysName')
-                            remote_port_name = self._snmp.get_property(
-                                PORT_ADJACENT_REM_PORT_DESCR.get_snmp_mib_oid(port_id))
+                            remote_port_name = self._snmp.get_property(**(
+                                    port_constants.PORT_ADJACENT_REM_PORT_DESCR + (port_id,)))
                             if remote_port_name and remote_sys_name:
                                 return self.ADJACENT_TEMPLATE.format(remote_host=remote_sys_name,
                                                                      remote_port=remote_port_name)
@@ -99,8 +98,9 @@ class SnmpIfPort(SnmpIfEntity):
         """
 
         index = "{}.{}".format(self.if_index, 1)
-        auto_negotiation = self._snmp.get_property(PORT_AUTO_NEG.get_snmp_mib_oid(index))
-        if auto_negotiation.safe_value and 'enabled' in auto_negotiation.safe_value.lower():
+        auto_negotiation = self._snmp.get_property(*(
+                                    port_constants.PORT_AUTO_NEG + (index,)))
+        if auto_negotiation and 'enabled' in auto_negotiation.lower():
             return 'True'
 
     def _get_duplex(self):

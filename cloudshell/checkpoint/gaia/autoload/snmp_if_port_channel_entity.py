@@ -1,9 +1,9 @@
-from cloudshell.snmp.autoload.domain.if_entity.snmp_if_entity import SnmpIfEntity
+from cloudshell.checkpoint.gaia.autoload.snmp_if_entity import SnmpIfEntity
 
 
 class SnmpIfPortChannel(SnmpIfEntity):
-    def __init__(self, snmp_handler, logger, port_name_response, port_attributes_snmp_tables, name=None):
-        super(SnmpIfPortChannel, self).__init__(snmp_handler, logger, port_name_response, port_attributes_snmp_tables)
+    def __init__(self, snmp_handler, logger, index, port_attributes_snmp_tables, name=None):
+        super(SnmpIfPortChannel, self).__init__(snmp_handler, logger, index, port_attributes_snmp_tables)
         self._port_channel_associated_port = ""
         self._if_name = name
 

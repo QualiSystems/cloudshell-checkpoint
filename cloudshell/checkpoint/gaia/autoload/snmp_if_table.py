@@ -9,7 +9,7 @@ from cloudshell.checkpoint.gaia.autoload import port_constants
 class SnmpIfTable(object):
     IF_PORT = SnmpIfPort
     IF_PORT_CHANNEL = SnmpIfPortChannel
-    PORT_CHANNEL_NAME = ["port-channel", "bundle-ether"]
+    PORT_CHANNEL_NAME = "bond"
     PORT_EXCLUDE_LIST = ["mgmt", "management", "loopback", "null", "."]
     PORT_NAME_PATTERN = re.compile(r"((\d+/).+)")
     PORT_NAME_SECONDARY_PATTERN = re.compile(r"\d+")
@@ -41,7 +41,7 @@ class SnmpIfTable(object):
     @property
     def if_port_channels(self):
         if not self._if_port_channels_dict:
-            self._get_if_entities()
+            self._get_port_channels()
         return self._if_port_channels_dict
 
     def get_if_entity_by_index(self, if_index):
@@ -51,22 +51,27 @@ class SnmpIfTable(object):
 
     def _get_if_entities(self):
         for port in self._if_table:
+            port_obj = self.IF_PORT(snmp_handler=self._snmp, logger=self._logger,
+                                    index=port,
+                                    port_attributes_snmp_tables=self.port_attributes_snmp_tables)
             if any([exclude_port for exclude_port in self._port_exclude_list if
-                    exclude_port in port.safe_value.lower()]):
+                    exclude_port in port_obj.if_descr_name.lower()
+                    or exclude_port in port_obj.if_name.lower()]) \
+                    or port_obj.if_name.lower().startswith(self.PORT_CHANNEL_NAME) \
+                    or port_obj.if_descr_name.lower().startswith(self.PORT_CHANNEL_NAME):
                 continue
-            else:
-                port_obj = self.IF_PORT(snmp_handler=self._snmp, logger=self._logger,
-                                        port_name_response=port,
-                                        port_attributes_snmp_tables=self.port_attributes_snmp_tables)
-                self._if_port_dict[port.index] = port_obj
+            self._if_port_dict[port] = port_obj
 
     def _get_port_channels(self):
         for port in self._if_table:
-            if any([port_channel for port_channel in self.PORT_CHANNEL_NAME if port_channel in port.safe_value.lower()]):
-                port_channel_obj = self.IF_PORT_CHANNEL(snmp_handler=self._snmp, logger=self._logger,
-                                                        port_name_response=port,
-                                                        port_attributes_snmp_tables=self.port_attributes_snmp_tables)
-                self._if_port_channels_dict[port.index] = port_channel_obj
+            if port in self._if_port_dict:
+                continue
+            port_channel_obj = self.IF_PORT_CHANNEL(snmp_handler=self._snmp, logger=self._logger,
+                                                    port_name_response=port,
+                                                    port_attributes_snmp_tables=self.port_attributes_snmp_tables)
+            if port_channel_obj.if_name.lower().startswith(self.PORT_CHANNEL_NAME) \
+                    or port_channel_obj.if_descr_name.lower().startswith(self.PORT_CHANNEL_NAME):
+                self._if_port_channels_dict[port] = port_channel_obj
 
     def _load_snmp_tables(self):
         """ Load all cisco required snmp tables
@@ -74,12 +79,12 @@ class SnmpIfTable(object):
         """
 
         self._logger.info('Start loading MIB tables:')
-        self._if_table = self._snmp.walk(**port_constants.PORT_DESCR_NAME.get_snmp_mib_oid())
-        if not self._if_table:
-            self._if_table = self._snmp.walk(**port_constants.PORT_NAME.get_snmp_mib_oid())
-            if not self._if_table:
-                self._if_table = self._snmp.walk(**port_constants.PORT_INDEX.get_snmp_mib_oid())
-
+        if_table = self._snmp.get_table(*port_constants.PORT_DESCR_NAME)
+        if not if_table:
+            if_table = self._snmp.get_table(*port_constants.PORT_NAME)
+            if not if_table:
+                if_table = self._snmp.get_table(*port_constants.PORT_INDEX)
+        self._if_table = if_table.keys()
         self._logger.info('ifIndex table loaded')
 
     def get_if_index_from_port_name(self, port_name, port_filter_pattern):

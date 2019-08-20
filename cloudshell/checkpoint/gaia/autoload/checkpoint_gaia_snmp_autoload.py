@@ -5,7 +5,7 @@ import re
 import os
 
 from cloudshell.devices.autoload.autoload_builder import AutoloadDetailsBuilder
-from cloudshell.devices.standards.networking.autoload_structure import *
+from cloudshell.devices.standards.firewall.autoload_structure import *
 
 from cloudshell.checkpoint.gaia.autoload.snmp_if_table import SnmpIfTable
 
@@ -30,6 +30,15 @@ class CheckpointSNMPAutoload(object):
                                         shell_type=shell_type,
                                         name=resource_name,
                                         unique_id=resource_name)
+        self._if_table = None
+
+    @property
+    def if_table(self):
+        if not self._if_table:
+            SnmpIfTable.PORT_EXCLUDE_LIST.extend(["lo", "sync"])
+            self._if_table = SnmpIfTable(snmp_handler=self.snmp_handler, logger=self.logger)
+
+        return self._if_table
 
     def load_mibs(self):
         """
@@ -59,6 +68,7 @@ class CheckpointSNMPAutoload(object):
         chassis = self._get_chassis_attributes(self.resource)
         self._get_power_ports(chassis)
         self._get_ports_attributes(chassis)
+        self._get_port_channels(self.resource)
 
         autoload_details = AutoloadDetailsBuilder(self.resource).autoload_details()
         self._log_autoload_details(autoload_details)
@@ -108,9 +118,8 @@ class CheckpointSNMPAutoload(object):
         """
 
         self.logger.info("Load Ports:")
-        SnmpIfTable.PORT_EXCLUDE_LIST.append("lo")
-        if_table = SnmpIfTable(snmp_handler=self.snmp_handler, logger=self.logger)
-        for port in if_table.if_ports:
+
+        for port in self.if_table.if_ports.values():
 
             interface_name = port.if_name or port.if_descr_name
             if not interface_name:
@@ -132,11 +141,49 @@ class CheckpointSNMPAutoload(object):
             port_object.auto_negotiation = port.auto_negotiation
             port_object.adjacent = port.adjacent
 
-            chassis.add_sub_resource(port, port_object)
+            chassis.add_sub_resource(port.if_index, port_object)
 
             self.logger.info("Added " + interface_name + " Port")
 
         self.logger.info("Building Ports completed")
+
+    def _get_port_channels(self, root_resource):
+        """Get all port channels and set attributes for them
+        :return:
+        """
+
+        if not self.if_table.if_port_channels:
+            return
+        self.logger.info("Building Port Channels")
+        for if_port_channel in self.if_table.if_port_channels.values():
+            interface_model = if_port_channel.if_name
+            match_object = re.search(r"\d+$", interface_model)
+            if match_object:
+                interface_id = "{0}".format(match_object.group(0))
+                associated_ports = ""
+                for port in if_port_channel.associated_port_list:
+                    if_port_name = self.if_table.get_if_entity_by_index(port).if_name
+                    associated_ports += if_port_name.replace('/', '-').replace(' ', '') + '; '
+
+                port_channel = GenericPortChannel(shell_name=self.shell_name,
+                                                  name=interface_model,
+                                                  unique_id="{0}.{1}.{2}".format(self.resource_name,
+                                                                                 "port_channel",
+                                                                                 interface_id))
+
+                port_channel.associated_ports = associated_ports.strip(' \t\n\r')
+                port_channel.port_description = if_port_channel.if_port_description
+                port_channel.ipv4_address = if_port_channel.ipv4_address
+                port_channel.ipv6_address = if_port_channel.ipv6_address
+
+                root_resource.add_sub_resource(interface_id, port_channel)
+
+                self.logger.info("Added " + interface_model + " Port Channel")
+
+            else:
+                self.logger.error("Adding of {0} failed. Name is invalid".format(interface_model))
+
+        self.logger.info("Building Port Channels completed")
 
     def _get_chassis_attributes(self, root_resource):
         """ Get Chassis element attributes """
@@ -155,6 +202,7 @@ class CheckpointSNMPAutoload(object):
         root_resource.add_sub_resource(relative_address, chassis_object)
         self.logger.info("Added " + chassis_object.model + " Chassis")
         self.logger.info("Building Chassis completed")
+        return chassis_object
 
     def _get_device_details(self):
         """ Get root element attributes """
@@ -190,33 +238,30 @@ class CheckpointSNMPAutoload(object):
         self.logger.info("Building Power Ports completed")
 
 
-# if __name__ == "__main__":
-#     from cloudshell.core.logger.qs_logger import get_qs_logger
-#     from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
-#     from cloudshell.snmp.cloudshell_snmp import Snmp
-#
-#     logger = get_qs_logger()
-#     # ip = "192.168.105.8"
-#     # ip = "192.168.73.66"
-#     ip = "192.168.73.102"
-#     # ip = "192.168.105.11"
-#     # ip = "192.168.105.4"
-#     # ip = "192.168.73.142"
-#     # ip = "192.168.42.235"
-#     comm = "public"
-#     # comm = "private"
-#     # comm = "Aa123456"
-#     # comm = "Cisco"
-#     snmp_params = SNMPV2Parameters(ip, comm)
-#     logger.info("started")
-#     snmp_handler = Snmp(logger=logger, snmp_parameters=snmp_params)
-#
-#     with snmp_handler.get_snmp_service() as snmp_service:
-#         snmp_service.update_mib_file_sources("D:\\_Quali_Git\\cloudshell-networking-cisco\\cloudshell\\networking\\cisco\\mibs")
-#         if_table = SnmpIfTable(logger=logger, snmp_handler=snmp_service)
-#
-#         for port_id, port in if_table.if_ports.iteritems():
-#             print port.ipv4_address
-#             print port.ipv6_address
-#
-#         print("done")
+if __name__ == "__main__":
+    from cloudshell.core.logger.qs_logger import get_qs_logger
+    from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
+    from cloudshell.snmp.quali_snmp import QualiSnmp
+
+    logger = get_qs_logger()
+    # ip = "192.168.105.8"
+    # ip = "192.168.73.66"
+    ip = "192.168.105.32"
+    # ip = "192.168.73.146"
+    # ip = "192.168.105.11"
+    # ip = "192.168.105.4"
+    # ip = "192.168.73.142"
+    # ip = "192.168.42.235"
+    comm = "public"
+    # comm = "private"
+    # comm = "Aa123456"
+    # comm = "Cisco"
+    snmp_params = SNMPV2ReadParameters(ip, comm)
+    logger.info("started")
+    snmp_handler = QualiSnmp(logger=logger, snmp_parameters=snmp_params)
+
+    snmp_handler.update_mib_sources("E:\Dev\_Quali_Git\cloudshell-checkpoint\cloudshell\checkpoint\gaia\mibs")
+    # if_table = SnmpIfTable(logger=logger, snmp_handler=snmp_handler)
+    autoload = CheckpointSNMPAutoload(snmp_handler, "name", "CS_Firewall", "dddd", logger)
+    autoload.discover([".*"])
+    print("done")
