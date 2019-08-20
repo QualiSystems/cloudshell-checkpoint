@@ -67,7 +67,7 @@ class SnmpIfTable(object):
             if port in self._if_port_dict:
                 continue
             port_channel_obj = self.IF_PORT_CHANNEL(snmp_handler=self._snmp, logger=self._logger,
-                                                    port_name_response=port,
+                                                    index=port,
                                                     port_attributes_snmp_tables=self.port_attributes_snmp_tables)
             if port_channel_obj.if_name.lower().startswith(self.PORT_CHANNEL_NAME) \
                     or port_channel_obj.if_descr_name.lower().startswith(self.PORT_CHANNEL_NAME):

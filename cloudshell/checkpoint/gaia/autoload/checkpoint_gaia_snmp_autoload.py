@@ -222,7 +222,7 @@ class CheckpointSNMPAutoload(object):
         """
 
         self.logger.info("Building PowerPorts")
-        pp_table = self.snmp_handler.get_table("CHECKPOINT-MIB", "powerSupplyStatus")
+        pp_table = self.snmp_handler.get_table("CHECKPOINT-MIB", "powerSupplyTable")
         for port in pp_table:
             relative_address = "PP{}".format(port)
 
@@ -236,32 +236,3 @@ class CheckpointSNMPAutoload(object):
 
             self.logger.info("Added Power Port")
         self.logger.info("Building Power Ports completed")
-
-
-if __name__ == "__main__":
-    from cloudshell.core.logger.qs_logger import get_qs_logger
-    from cloudshell.snmp.snmp_parameters import SNMPV2ReadParameters
-    from cloudshell.snmp.quali_snmp import QualiSnmp
-
-    logger = get_qs_logger()
-    # ip = "192.168.105.8"
-    # ip = "192.168.73.66"
-    ip = "192.168.105.32"
-    # ip = "192.168.73.146"
-    # ip = "192.168.105.11"
-    # ip = "192.168.105.4"
-    # ip = "192.168.73.142"
-    # ip = "192.168.42.235"
-    comm = "public"
-    # comm = "private"
-    # comm = "Aa123456"
-    # comm = "Cisco"
-    snmp_params = SNMPV2ReadParameters(ip, comm)
-    logger.info("started")
-    snmp_handler = QualiSnmp(logger=logger, snmp_parameters=snmp_params)
-
-    snmp_handler.update_mib_sources("E:\Dev\_Quali_Git\cloudshell-checkpoint\cloudshell\checkpoint\gaia\mibs")
-    # if_table = SnmpIfTable(logger=logger, snmp_handler=snmp_handler)
-    autoload = CheckpointSNMPAutoload(snmp_handler, "name", "CS_Firewall", "dddd", logger)
-    autoload.discover([".*"])
-    print("done")
