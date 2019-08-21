@@ -63,7 +63,6 @@ class CheckpointSNMPAutoload(object):
         self.logger.info("*" * 70)
         self.logger.info("Start SNMP discovery process .....")
 
-
         self._get_device_details()
 
         chassis = self._get_chassis_attributes(self.resource)
