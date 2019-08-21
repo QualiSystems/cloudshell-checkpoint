@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from cloudshell.devices.flows.cli_action_flows import DisableSnmpFlow
-from cloudshell.snmp.snmp_parameters import SNMPV2Parameters
 
 
 class CheckpointDisableSnmpFlow(DisableSnmpFlow):

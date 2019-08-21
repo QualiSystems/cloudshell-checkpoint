@@ -7,7 +7,7 @@ from cloudshell.checkpoint.gaia.flows.checkpoint_autoload_flow import Checkpoint
 
 class CheckpointAutoloadRunner(AutoloadRunner):
     def __init__(self, snmp_handler, logger, resource_config):
-        super(CheckpointAutoloadRunner, self).__init__(resource_config)
+        super(CheckpointAutoloadRunner, self).__init__(resource_config=resource_config, logger=logger)
         self.snmp_handler = snmp_handler
         self._logger = logger
 

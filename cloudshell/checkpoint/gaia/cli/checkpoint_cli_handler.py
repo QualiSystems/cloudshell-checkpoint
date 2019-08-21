@@ -73,4 +73,4 @@ class CheckpointCliHandler(CliHandlerImpl):
         :return:
         """
 
-        pass
+        session.send_line("set clienv rows 0", logger)

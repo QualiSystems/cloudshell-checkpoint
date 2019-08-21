@@ -54,15 +54,16 @@ class CheckpointSNMPAutoload(object):
 
         :return: AutoLoadDetails object
         """
+        self.load_mibs()
 
+        self.snmp_handler.load_mib(["CHECKPOINT-MIB"])
         if not self._is_valid_device_os(supported_os):
             raise Exception(self.__class__.__name__, 'Unsupported device OS')
 
         self.logger.info("*" * 70)
         self.logger.info("Start SNMP discovery process .....")
 
-        self.load_mibs()
-        self.snmp_handler.load_mib(["CHECKPOINT-MIB"])
+
         self._get_device_details()
 
         chassis = self._get_chassis_attributes(self.resource)
@@ -97,13 +98,9 @@ class CheckpointSNMPAutoload(object):
             :return: True or False
         """
 
-        system_description = self.snmp_handler.get_property('SNMPv2-MIB', 'sysObjectID', '0')
-        self.logger.debug('Detected system description: \'{0}\''.format(system_description))
-        result = re.search(r"({0})".format("|".join(supported_os)),
-                           system_description,
-                           flags=re.DOTALL | re.IGNORECASE)
-
-        if result:
+        system_object_id = self.snmp_handler.get_property('SNMPv2-MIB', 'sysObjectID', '0')
+        self.logger.debug('Detected system description: \'{0}\''.format(system_object_id))
+        if any([x for x in supported_os if x in system_object_id.lower()]):
             return True
         else:
             error_message = 'Incompatible driver! Please use this driver for \'{0}\' operation system(s)'. \
@@ -212,7 +209,7 @@ class CheckpointSNMPAutoload(object):
         self.resource.system_name = self.snmp_handler.get_property('SNMPv2-MIB', 'sysName', '0')
         self.resource.location = self.snmp_handler.get_property('SNMPv2-MIB', 'sysLocation', '0')
         self.resource.os_version = self.snmp_handler.get_property('CHECKPOINT-MIB', "svnVersion", '0')
-        self.resource.vendor = self.snmp_handler.get_property('CHECKPOINT-MIB', "svnApplianceManufacturer", '0')
+        self.resource.vendor = "Checkpoint"
         self.resource.model = self.snmp_handler.get_property('CHECKPOINT-MIB', "svnApplianceProductName", '0')
 
     def _get_power_ports(self, chassis):
