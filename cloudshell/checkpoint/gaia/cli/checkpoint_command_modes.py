@@ -46,7 +46,7 @@ class EnableCommandMode(CommandMode):
 
 
 class ExpertCommandMode(CommandMode):
-    PROMPT = r'^\[Expert.*#\s*$'
+    PROMPT = r'\[Expert.*#\s*$'
     ENTER_COMMAND = 'expert'
     EXIT_COMMAND = 'exit'
 
@@ -68,7 +68,8 @@ class ExpertCommandMode(CommandMode):
             self.EXIT_COMMAND,
             enter_action_map={
                 "[Pp]assword":
-                    lambda session, logger: session.send_line(self.enable_password, logger)
+                    lambda session, logger: (session.send_line(self.enable_password, logger),
+                                             session.send_line("clear", logger))
             }
         )
 
