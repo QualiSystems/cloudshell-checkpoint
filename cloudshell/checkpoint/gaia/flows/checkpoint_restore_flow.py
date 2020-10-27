@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-from time import localtime
-import hashlib
+import datetime
 from cloudshell.devices.flows.action_flows import RestoreConfigurationFlow
-from cloudshell.devices.networking_utils import UrlParser
 
+from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
 
 
@@ -26,24 +24,12 @@ class CheckpointRestoreFlow(RestoreConfigurationFlow):
 
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
-            url = UrlParser.parse_url(path)
-            scheme = url.get(UrlParser.SCHEME)
-            if scheme.lower() != "scp":
-                raise Exception("SCP only supported")
-            filename = url.get(UrlParser.FILENAME)
 
-            password = url.get(UrlParser.PASSWORD)
-            scp_target = "{user}@{hostname}:{filepath}/{filename}".format(
-                user=url.get(UrlParser.USERNAME),
-                hostname=url.get(UrlParser.HOSTNAME),
-                filepath=url.get(UrlParser.PATH),
-                filename=filename)
-
-            local_file = hashlib.sha1(str(localtime()).encode('utf-8')).hexdigest()
+            local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-remote.conf")
 
             # download by scp
             with cli_service.enter_mode(self._cli_handler.config_mode):
-                save_restore_actions.scp_transfer(scp_target, local_file, password)
+                FileTransferActions(cli_service, self._logger).scp_download(path, local_file)
 
             # restore local
             save_restore_actions.restore(local_file)
