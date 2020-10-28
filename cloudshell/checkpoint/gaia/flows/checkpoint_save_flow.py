@@ -29,7 +29,19 @@ class CheckpointSaveFlow(SaveConfigurationFlow):
             save_restore_actions.save_local(local_file)
 
             with cli_service.enter_mode(self._cli_handler.config_mode):
-                # transfer to remote by scp
-                FileTransferActions(cli_service, self._logger).scp_upload(local_file, folder_path)
-                # remove local file
-                save_restore_actions.remove_local_file(local_file)
+                # Transfer config to remote
+                file_transfer_actions = FileTransferActions(cli_service, self._logger)
+                if folder_path.startswith("scp"):
+                    transfer_func = file_transfer_actions.scp_upload
+                elif folder_path.startswith("ftp"):
+                    transfer_func = file_transfer_actions.ftp_upload
+                elif folder_path.startswith("tftp"):
+                    transfer_func = file_transfer_actions.tftp_upload
+                else:
+                    raise Exception("Url is not correct.")
+
+                try:
+                    transfer_func(local_file, folder_path)
+                finally:
+                    # remove local file
+                    save_restore_actions.remove_local_file(local_file)
