@@ -27,9 +27,19 @@ class CheckpointRestoreFlow(RestoreConfigurationFlow):
 
             local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-remote.conf")
 
-            # download by scp
             with cli_service.enter_mode(self._cli_handler.config_mode):
-                FileTransferActions(cli_service, self._logger).scp_download(path, local_file)
+                # Transfer config from remote
+                file_transfer_actions = FileTransferActions(cli_service, self._logger)
+                if path.startswith("scp"):
+                    transfer_func = file_transfer_actions.scp_download
+                elif path.startswith("ftp"):
+                    transfer_func = file_transfer_actions.ftp_download
+                elif path.startswith("tftp"):
+                    transfer_func = file_transfer_actions.tftp_download
+                else:
+                    raise Exception("Url is not correct.")
+
+                transfer_func(path, local_file)
 
             # restore local
             save_restore_actions.restore(local_file)
