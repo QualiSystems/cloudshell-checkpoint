@@ -3,6 +3,7 @@
 import datetime
 
 from cloudshell.devices.flows.action_flows import SaveConfigurationFlow
+from cloudshell.devices.networking_utils import UrlParser
 
 from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
@@ -23,19 +24,25 @@ class CheckpointSaveFlow(SaveConfigurationFlow):
 
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
-            local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-local.conf")
+            # local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-local.conf")
+            url_obj = UrlParser.parse_url(folder_path)
+            local_file = url_obj.get(UrlParser.FILENAME)
+            scheme = url_obj.get(UrlParser.SCHEME)
 
             # save config to local fs
             save_restore_actions.save_local(local_file)
 
+            if scheme == "local":
+                return
+
             with cli_service.enter_mode(self._cli_handler.config_mode):
                 # Transfer config to remote
                 file_transfer_actions = FileTransferActions(cli_service, self._logger)
-                if folder_path.startswith("scp"):
+                if scheme == "scp":
                     transfer_func = file_transfer_actions.scp_upload
-                elif folder_path.startswith("ftp"):
+                elif scheme == "ftp":
                     transfer_func = file_transfer_actions.ftp_upload
-                elif folder_path.startswith("tftp"):
+                elif scheme == "tftp":
                     transfer_func = file_transfer_actions.tftp_upload
                 else:
                     raise Exception("Url is not correct.")

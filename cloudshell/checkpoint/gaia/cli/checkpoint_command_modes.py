@@ -69,7 +69,8 @@ class ExpertCommandMode(CommandMode):
             enter_action_map={
                 "[Pp]assword":
                     lambda session, logger: (session.send_line(self.enable_password, logger),
-                                             session.send_line("clear", logger))
+                                             session.send_line('\n', logger))
+                                             # session.send_line("clear", logger))
             }
         )
 

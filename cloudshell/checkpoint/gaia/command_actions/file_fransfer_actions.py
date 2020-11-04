@@ -90,12 +90,12 @@ class FileTransferActions(object):
 
     def curl_ftp_upload(self, filepath, remote_url):
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=CommandTemplate(r"curl -s -T {local_file} {remote_url}")
+                                       command_template=CommandTemplate(r"curl -Ss -T {local_file} {remote_url}")
                                        ).execute_command(local_file=filepath, remote_url=remote_url)
 
     def curl_ftp_download(self, remote_url, filepath):
         return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=CommandTemplate(r"curl -s -o {local_file} {remote_url}")
+                                       command_template=CommandTemplate(r"curl -Ss -o {local_file} {remote_url}")
                                        ).execute_command(local_file=filepath, remote_url=remote_url)
 
     def tftp_upload(self, filepath, remote_url):
