@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from cloudshell.devices.flows.action_flows import RestoreConfigurationFlow
+from cloudshell.devices.networking_utils import UrlParser
 
 from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
@@ -25,25 +26,30 @@ class CheckpointRestoreFlow(RestoreConfigurationFlow):
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
 
-            local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-remote.conf")
+            url_obj = UrlParser.parse_url(path)
+            local_file = url_obj.get(UrlParser.FILENAME)
+            scheme = url_obj.get(UrlParser.SCHEME)
+            # local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-remote.conf")
 
-            with cli_service.enter_mode(self._cli_handler.config_mode):
+            if scheme != "local":
                 # Transfer config from remote
                 file_transfer_actions = FileTransferActions(cli_service, self._logger)
-                if path.startswith("scp"):
+                if scheme == "scp":
                     transfer_func = file_transfer_actions.scp_download
-                elif path.startswith("ftp"):
+                elif scheme == "ftp":
                     transfer_func = file_transfer_actions.ftp_download
-                elif path.startswith("tftp"):
+                elif scheme == "tftp":
                     transfer_func = file_transfer_actions.tftp_download
                 else:
                     raise Exception("Url is not correct.")
 
-                transfer_func(path, local_file)
+                with cli_service.enter_mode(self._cli_handler.config_mode):
+                    transfer_func(path, local_file)
 
             # restore local
             save_restore_actions.restore(local_file)
 
             # remove local file
-            with cli_service.enter_mode(self._cli_handler.config_mode):
-                save_restore_actions.remove_local_file(local_file)
+            if scheme != "local":
+                with cli_service.enter_mode(self._cli_handler.config_mode):
+                    save_restore_actions.remove_local_file(local_file)

@@ -21,14 +21,8 @@ class SaveRestoreActions(object):
         return CommandTemplateExecutor(cli_service=self._cli_service,
                                        command_template=command_templates.SAVE_CONFIGURATION,
                                        action_map=action_map,
-                                       error_map=error_map).execute_command(filename=filename)
-
-    def scp_transfer(self, src_location, dst_location, password):
-        passwd_action = OrderedDict([(r"[Pp]assword:", lambda s, l: s.send_line(password, l))])
-        return CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=command_templates.SCP,
-                                       action_map=passwd_action).execute_command(src_location=src_location,
-                                                                                 dst_location=dst_location)
+                                       error_map=error_map,
+                                       timeout=300).execute_command(filename=filename)
 
     def remove_local_file(self, filepath):
         return CommandTemplateExecutor(cli_service=self._cli_service,
@@ -40,8 +34,8 @@ class SaveRestoreActions(object):
                                        command_template=command_templates.ON_FAILURE_CONTINUE
                                        ).execute_command()
         out += CommandTemplateExecutor(cli_service=self._cli_service,
-                                       command_template=command_templates.LOAD_CONFIGURATION
-                                       ).execute_command(filename=filepath)
+                                       command_template=command_templates.LOAD_CONFIGURATION,
+                                       timeout=300).execute_command(filename=filepath)
         out += CommandTemplateExecutor(cli_service=self._cli_service,
                                        command_template=command_templates.ON_FAILURE_STOP
                                        ).execute_command()
