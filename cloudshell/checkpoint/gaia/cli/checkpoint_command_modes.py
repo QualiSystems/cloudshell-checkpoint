@@ -1,5 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import re
+import random
+from collections import OrderedDict
+
+from backports.functools_lru_cache import lru_cache
+from passlib.hash import md5_crypt
 
 from cloudshell.cli.command_mode import CommandMode
 
@@ -66,20 +72,60 @@ class ExpertCommandMode(CommandMode):
             self.PROMPT,
             self.ENTER_COMMAND,
             self.EXIT_COMMAND,
+            enter_error_map={r"[Ww]rong\spassword": "Wrong password."},
             enter_action_map={
                 "[Pp]assword":
                     lambda session, logger: (session.send_line(self.enable_password, logger),
-                                             session.send_line('\n', logger))
-                                             # session.send_line("clear", logger))
+                                             session.send_line('\n', logger)),
+                # Raise an error action
+                r"[Ww]rong\spassword": lambda s, l: self._incorrect_password_exception()
             }
         )
 
+    @staticmethod
+    def _incorrect_password_exception():
+        raise Exception("Incorrect expert password.")
+
+    def _expert_password_defined(self, cli_service, logger):
+        """
+        Check if expert password defined
+        :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
+        :param logging.Logger logger:
+        :rtype: bool
+        """
+        if isinstance(cli_service.command_mode, EnableCommandMode):
+            result = cli_service.send_command("show configuration expert-password")
+            return re.match(r'^set\sexpert-password-hash\s.+$', result, re.MULTILINE) is not None
+        else:
+            raise Exception("Cannot verify expert password, command mode is not correct")
+
+    def _set_expert_password(self, cli_service, logger):
+        """
+        Set expert password
+        :param cloudshell.cli.cli_service.CliService cli_service:
+        :param logging.Logger logger:
+        :rtype: bool
+        """
+
+        # gen enable password hash
+        enable_password_hash = md5_crypt.hash(self.enable_password, salt_size=random.choice(range(5, 10)))
+
+        error_map = OrderedDict([("Configuration lock present", "Configuration lock present."),
+                                 ("Failed to maintain the lock", "Failed to maintain the lock."),
+                                 ("Wrong password", "Wrong password.")])
+        cli_service.send_command(command="set expert-password-hash {}".format(enable_password_hash),
+                                 logger=logger,
+                                 error_map=error_map)
+
+    def step_up(self, cli_service, logger):
+        if not self._expert_password_defined(cli_service, logger):
+            self._set_expert_password(cli_service, logger)
+        super(ExpertCommandMode, self).step_up(cli_service, logger)
+
     @property
+    @lru_cache()
     def enable_password(self):
-        if not self._enable_password:
-            password = self.resource_config.enable_password
-            self._enable_password = self._api.DecryptPassword(password).Value
-        return self._enable_password
+        return self._api.DecryptPassword(self.resource_config.enable_password).Value
 
 
 CommandMode.RELATIONS_DICT = {
