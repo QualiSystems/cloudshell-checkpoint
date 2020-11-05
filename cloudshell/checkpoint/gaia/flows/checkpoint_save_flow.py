@@ -1,10 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import datetime
 
 from cloudshell.devices.flows.action_flows import SaveConfigurationFlow
-from cloudshell.devices.networking_utils import UrlParser
-
 from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
 
@@ -24,31 +21,20 @@ class CheckpointSaveFlow(SaveConfigurationFlow):
 
         with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
-            # local_file = datetime.datetime.now().strftime("%Y%m%d%H%M%S-local.conf")
-            url_obj = UrlParser.parse_url(folder_path)
-            local_file = url_obj.get(UrlParser.FILENAME)
-            scheme = url_obj.get(UrlParser.SCHEME)
+            file_transfer_actions = FileTransferActions(cli_service, self._logger)
+
+            url_obj = FileTransferActions.get_url_obj(folder_path)
 
             # save config to local fs
-            save_restore_actions.save_local(local_file)
+            save_restore_actions.save_local(url_obj.filename)
 
-            if scheme == "local":
+            if url_obj.scheme == url_obj.SCHEME.LOCAL:
                 return
 
             with cli_service.enter_mode(self._cli_handler.config_mode):
                 # Transfer config to remote
-                file_transfer_actions = FileTransferActions(cli_service, self._logger)
-                if scheme == "scp":
-                    transfer_func = file_transfer_actions.scp_upload
-                elif scheme == "ftp":
-                    transfer_func = file_transfer_actions.ftp_upload
-                elif scheme == "tftp":
-                    transfer_func = file_transfer_actions.tftp_upload
-                else:
-                    raise Exception("Url is not correct.")
-
                 try:
-                    transfer_func(local_file, folder_path)
+                    file_transfer_actions.upload(url_obj.filename, folder_path)
                 finally:
                     # remove local file
-                    save_restore_actions.remove_local_file(local_file)
+                    save_restore_actions.remove_local_file(url_obj.filename)
