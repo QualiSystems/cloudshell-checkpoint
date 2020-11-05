@@ -54,7 +54,9 @@ class FileTransferActions(object):
         ftp_action_map = OrderedDict(
             [(r"[Nn]ame|[Uu]sername|[Ll]ogin.*:", lambda s, l: s.send_line(url_obj.username, l)),
              (r"[Pp]assword.*:", lambda s, l: s.send_line(url_obj.password, l))])
-        ftp_error_map = OrderedDict([(r"[Ll]ogin incorrect|failed", "Login or Password is not correct.")])
+        ftp_error_map = OrderedDict([(r"[Ll]ogin incorrect|failed", "Login or Password is not correct."),
+                                     (r"[Cc]onnection timed out|[Nn]ot connected", "Cannot connect to ftp host."),
+                                     ])
 
         ftp_command_mode = CommandMode(r"ftp>",
                                        enter_command="ftp {} {}".format(url_obj.hostname, url_obj.port or "21"),
@@ -99,10 +101,10 @@ class FileTransferActions(object):
                                        ).execute_command(local_file=filepath, remote_url=remote_url)
 
     def tftp_upload(self, filepath, remote_url):
-        pass
+        raise Exception("Tftp protocol is not implemented")
 
     def tftp_download(self, remote_url, filepath):
-        pass
+        raise Exception("Tftp protocol is not implemented")
 
 
 class Url:
