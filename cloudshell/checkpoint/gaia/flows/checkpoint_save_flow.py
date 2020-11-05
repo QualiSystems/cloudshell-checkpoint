@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from cloudshell.devices.flows.action_flows import SaveConfigurationFlow
-from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions
+from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions, Url
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
 
 
@@ -23,7 +23,7 @@ class CheckpointSaveFlow(SaveConfigurationFlow):
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
             file_transfer_actions = FileTransferActions(cli_service, self._logger)
 
-            url_obj = FileTransferActions.get_url_obj(folder_path)
+            url_obj = Url.get_url_obj(folder_path)
 
             # save config to local fs
             save_restore_actions.save_local(url_obj.filename)

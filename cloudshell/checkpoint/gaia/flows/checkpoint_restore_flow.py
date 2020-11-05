@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from cloudshell.devices.flows.action_flows import RestoreConfigurationFlow
-from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions
+from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions, Url
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
 
 
@@ -24,7 +24,7 @@ class CheckpointRestoreFlow(RestoreConfigurationFlow):
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
             file_transfer_actions = FileTransferActions(cli_service, self._logger)
 
-            url_obj = FileTransferActions.get_url_obj(path)
+            url_obj = Url.get_url_obj(path)
 
             if url_obj.scheme != url_obj.SCHEME.LOCAL:
                 with cli_service.enter_mode(self._cli_handler.config_mode):
