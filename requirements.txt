@@ -1,3 +1,4 @@
+passlib
+backports.functools-lru-cache
 cloudshell-firewall>=3.0,<3.1
 cloudshell-networking-devices>=2.7,<2.8
-passlib

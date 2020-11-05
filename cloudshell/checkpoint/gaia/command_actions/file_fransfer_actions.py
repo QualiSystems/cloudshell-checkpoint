@@ -17,6 +17,11 @@ class Url:
     def __init__(self, url):
         self._url_object = UrlParser.parse_url(url)
 
+    @staticmethod
+    @lru_cache()
+    def get_url_obj(url):
+        return Url(url)
+    
     @property
     def scheme(self):
         return self._url_object.get(UrlParser.SCHEME)
@@ -76,20 +81,15 @@ class FileTransferActions(object):
                               Url.SCHEME.SCP: self.scp_download,
                               Url.SCHEME.TFTP: self.tftp_download}
 
-    @staticmethod
-    @lru_cache()
-    def get_url_obj(url):
-        return Url(url)
-
     def upload(self, filepath, remote_url):
-        scheme = self.get_url_obj(remote_url).scheme
+        scheme = Url.get_url_obj(remote_url).scheme
         upload_method = self._upload_map.get(scheme)
         if not upload_method:
             raise Exception("Upload protocol {} is not supported".format(scheme))
         return upload_method(filepath, remote_url)
 
     def download(self, remote_url, filepath):
-        scheme = self.get_url_obj(remote_url).scheme
+        scheme = Url.get_url_obj(remote_url).scheme
         download_method = self._download_map.get(scheme)
         if not download_method:
             raise Exception("Download protocol {} is not supported".format(scheme))
@@ -114,7 +114,7 @@ class FileTransferActions(object):
                                        action_map=scp_actions, error_map=scp_errors).execute_command(**kwargs)
 
     def scp_upload(self, filepath, remote_url):
-        url_obj = self.get_url_obj(remote_url)
+        url_obj = Url.get_url_obj(remote_url)
         command_template = CommandTemplate("scp -P {scp_port} {src_location} {dst_location}")
         return self._run_scp_template(url_obj, command_template,
                                       scp_port=url_obj.port or "22",
@@ -122,7 +122,7 @@ class FileTransferActions(object):
                                       dst_location=url_obj.get_scp_endpoint())
 
     def scp_download(self, remote_url, filepath):
-        url_obj = self.get_url_obj(remote_url)
+        url_obj = Url.get_url_obj(remote_url)
         command_template = CommandTemplate("scp -P {scp_port} {src_location} {dst_location}")
         return self._run_scp_template(url_obj, command_template,
                                       scp_port=url_obj.port or "22",
@@ -163,7 +163,7 @@ class FileTransferActions(object):
                 ftp_command_mode.step_down(self._cli_service, self._logger)
 
     def ftp_upload(self, filepath, remote_url):
-        url_obj = self.get_url_obj(remote_url)
+        url_obj = Url.get_url_obj(remote_url)
         command_template = CommandTemplate("put {src_location} {dst_location}", error_map=OrderedDict(
             [(r"Could not create file", "FTP: Could not create file.")]))
         return self._run_ftp_template(url_obj, command_template,
@@ -171,7 +171,7 @@ class FileTransferActions(object):
                                       dst_location=url_obj.get_ftp_path())
 
     def ftp_download(self, remote_url, filepath):
-        url_obj = self.get_url_obj(remote_url)
+        url_obj = Url.get_url_obj(remote_url)
         command_template = CommandTemplate("get {src_location} {dst_location}", error_map=OrderedDict(
             []))
         return self._run_ftp_template(url_obj, command_template,
