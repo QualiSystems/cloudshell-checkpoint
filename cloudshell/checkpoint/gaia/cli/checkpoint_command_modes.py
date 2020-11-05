@@ -78,13 +78,13 @@ class ExpertCommandMode(CommandMode):
                     lambda session, logger: (session.send_line(self.enable_password, logger),
                                              session.send_line('\n', logger)),
                 # Raise an error action
-                r"[Ww]rong\spassword": lambda s, l: self._incorrect_password_exception()
+                r"[Ww]rong\spassword": lambda s, l: self._exception("Incorrect expert password.")
             }
         )
 
     @staticmethod
-    def _incorrect_password_exception():
-        raise Exception("Incorrect expert password.")
+    def _exception(message):
+        raise Exception(message)
 
     def _expert_password_defined(self, cli_service, logger):
         """
@@ -93,6 +93,7 @@ class ExpertCommandMode(CommandMode):
         :param logging.Logger logger:
         :rtype: bool
         """
+        logger.debug("Check if expert password defined.")
         if isinstance(cli_service.command_mode, EnableCommandMode):
             result = cli_service.send_command("show configuration expert-password")
             return re.match(r'^set\sexpert-password-hash\s.+$', result, re.MULTILINE) is not None
