@@ -21,7 +21,7 @@ class Url:
     @lru_cache()
     def get_url_obj(url):
         return Url(url)
-    
+
     @property
     def scheme(self):
         return self._url_object.get(UrlParser.SCHEME)
@@ -73,24 +73,17 @@ class FileTransferActions(object):
         """
         self._cli_service = cli_service
         self._logger = logger
-        self._upload_map = {Url.SCHEME.FTP: self.ftp_upload,
-                            Url.SCHEME.SCP: self.scp_upload,
-                            Url.SCHEME.TFTP: self.tftp_upload}
-
-        self._download_map = {Url.SCHEME.FTP: self.ftp_download,
-                              Url.SCHEME.SCP: self.scp_download,
-                              Url.SCHEME.TFTP: self.tftp_download}
 
     def upload(self, filepath, remote_url):
         scheme = Url.get_url_obj(remote_url).scheme
-        upload_method = self._upload_map.get(scheme)
+        upload_method = getattr(self, "{}_{}".format(scheme, "upload"))
         if not upload_method:
             raise Exception("Upload protocol {} is not supported".format(scheme))
         return upload_method(filepath, remote_url)
 
     def download(self, remote_url, filepath):
         scheme = Url.get_url_obj(remote_url).scheme
-        download_method = self._download_map.get(scheme)
+        download_method = getattr(self, "{}_{}".format(scheme, "download"))
         if not download_method:
             raise Exception("Download protocol {} is not supported".format(scheme))
         return download_method(remote_url, filepath)
