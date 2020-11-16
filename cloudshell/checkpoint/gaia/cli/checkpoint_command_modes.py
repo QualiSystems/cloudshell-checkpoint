@@ -4,10 +4,9 @@ import re
 import random
 from collections import OrderedDict
 
-from backports.functools_lru_cache import lru_cache
 from passlib.hash import md5_crypt
 
-from cloudshell.cli.command_mode import CommandMode
+from cloudshell.cli.service.command_mode import CommandMode
 
 
 class MaintenanceCommandMode(CommandMode):
@@ -15,11 +14,10 @@ class MaintenanceCommandMode(CommandMode):
     ENTER_COMMAND = ''
     EXIT_COMMAND = ''
 
-    def __init__(self, resource_config, api):
+    def __init__(self, resource_config):
         """ Initialize Default command mode, only for cases when session started not in enable mode """
 
         self.resource_config = resource_config
-        self._api = api
 
         CommandMode.__init__(self,
                              MaintenanceCommandMode.PROMPT,
@@ -38,11 +36,10 @@ class EnableCommandMode(CommandMode):
     ENTER_COMMAND = 'clish'
     EXIT_COMMAND = ''
 
-    def __init__(self, resource_config, api):
+    def __init__(self, resource_config):
         """ Initialize Enable command mode - default command mode for CheckPoint Shells """
 
         self.resource_config = resource_config
-        self._api = api
 
         super(EnableCommandMode, self).__init__(
             self.PROMPT,
@@ -56,17 +53,12 @@ class ExpertCommandMode(CommandMode):
     ENTER_COMMAND = 'expert'
     EXIT_COMMAND = 'exit'
 
-    def __init__(self, resource_config, api):
-        """ Initialize Expert Command Mode """
+    def __init__(self, resource_config):
+        """ Initialize Expert Command Mode
+        :param cloudshell.shell.standards.firewall.resource_config.FirewallResourceConfig resource_config:
+        """
 
         self.resource_config = resource_config
-        self._api = api
-        self._enable_password = None
-
-        CommandMode.__init__(self,
-                             ExpertCommandMode.PROMPT,
-                             ExpertCommandMode.ENTER_COMMAND,
-                             ExpertCommandMode.EXIT_COMMAND)
 
         super(ExpertCommandMode, self).__init__(
             self.PROMPT,
@@ -75,7 +67,7 @@ class ExpertCommandMode(CommandMode):
             enter_error_map={r"[Ww]rong\spassword": "Wrong password."},
             enter_action_map={
                 "[Pp]assword":
-                    lambda session, logger: (session.send_line(self.enable_password, logger),
+                    lambda session, logger: (session.send_line(self.resource_config.enable_password, logger),
                                              session.send_line('\n', logger)),
                 # Raise an error action
                 r"[Ww]rong\spassword": lambda s, l: self._exception("Incorrect expert password.")
@@ -86,7 +78,8 @@ class ExpertCommandMode(CommandMode):
     def _exception(message):
         raise Exception(message)
 
-    def _expert_password_defined(self, cli_service, logger):
+    @staticmethod
+    def _expert_password_defined(cli_service, logger):
         """
         Check if expert password defined
         :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
@@ -109,7 +102,8 @@ class ExpertCommandMode(CommandMode):
         """
 
         # gen enable password hash
-        enable_password_hash = md5_crypt.hash(self.enable_password, salt_size=random.choice(range(5, 10)))
+        enable_password_hash = md5_crypt.hash(self.resource_config.enable_password,
+                                              salt_size=random.choice(range(5, 10)))
 
         error_map = OrderedDict([("Configuration lock present", "Configuration lock present."),
                                  ("Failed to maintain the lock", "Failed to maintain the lock."),
@@ -122,11 +116,6 @@ class ExpertCommandMode(CommandMode):
         if not self._expert_password_defined(cli_service, logger):
             self._set_expert_password(cli_service, logger)
         super(ExpertCommandMode, self).step_up(cli_service, logger)
-
-    @property
-    @lru_cache()
-    def enable_password(self):
-        return self._api.DecryptPassword(self.resource_config.enable_password).Value
 
 
 CommandMode.RELATIONS_DICT = {

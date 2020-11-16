@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from cloudshell.devices.snmp_handler import SnmpHandler
-from cloudshell.checkpoint.gaia.cli.checkpoint_cli_handler import CheckpointCliHandler
+from cloudshell.checkpoint.gaia.cli.checkpoint_cli_configurator import CheckpointCliHandler
 from cloudshell.checkpoint.gaia.flows.checkpoint_disable_snmp_flow import CheckpointDisableSnmpFlow
 from cloudshell.checkpoint.gaia.flows.checkpoint_enable_snmp_flow import CheckpointEnableSnmpFlow
 

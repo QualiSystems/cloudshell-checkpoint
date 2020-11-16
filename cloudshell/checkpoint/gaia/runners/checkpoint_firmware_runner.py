@@ -3,7 +3,7 @@
 
 from cloudshell.devices.runners.firmware_runner import FirmwareRunner
 
-from cloudshell.checkpoint.gaia.cli.checkpoint_cli_handler import CheckpointCliHandler
+from cloudshell.checkpoint.gaia.cli.checkpoint_cli_configurator import CheckpointCliHandler
 from cloudshell.checkpoint.gaia.flows.checkpoint_load_firmware_flow import CheckpointLoadFirmwareFlow
 
 
