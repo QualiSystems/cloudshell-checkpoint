@@ -13,22 +13,22 @@ class CheckpointEnableDisableSnmpFlow(EnableDisableSnmpFlowInterface):
         self._logger = logger
 
     def enable_snmp(self, snmp_parameters):
-        with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
+        with self._cli_configurator.enable_mode_service() as cli_service:
             if snmp_parameters.version == snmp_parameters.SnmpVersion.V3:
-                enable_snmp = self._enable_snmp_v3
+                enable_snmp_func = self._enable_snmp_v3
             else:
-                enable_snmp = self._enable_snmp_v2
+                enable_snmp_func = self._enable_snmp_v2
 
-            enable_snmp(cli_service=cli_service, snmp_parameters=snmp_parameters)
+            enable_snmp_func(cli_service=cli_service, snmp_parameters=snmp_parameters)
 
     def disable_snmp(self, snmp_parameters):
-        with self._cli_handler.get_cli_service(self._cli_handler.enable_mode) as cli_service:
+        with self._cli_configurator.enable_mode_service() as cli_service:
             if snmp_parameters.version == snmp_parameters.SnmpVersion.V3:
-                disable_snmp = self._disable_snmp_v3
+                disable_snmp_func = self._disable_snmp_v3
             else:
-                disable_snmp = self._disable_snmp_v2
+                disable_snmp_func = self._disable_snmp_v2
 
-            disable_snmp(cli_service=cli_service, snmp_parameters=snmp_parameters)
+            disable_snmp_func(cli_service=cli_service, snmp_parameters=snmp_parameters)
 
     def _enable_snmp_v2(self, cli_service, snmp_parameters):
         """

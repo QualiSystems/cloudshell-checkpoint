@@ -103,7 +103,7 @@ class ExpertCommandMode(CommandMode):
 
         # gen enable password hash
         enable_password_hash = md5_crypt.hash(self.resource_config.enable_password,
-                                              salt_size=random.choice(range(5, 10)))
+                                              salt_size=random.choice(range(5, 8)))
 
         error_map = OrderedDict([("Configuration lock present", "Configuration lock present."),
                                  ("Failed to maintain the lock", "Failed to maintain the lock."),

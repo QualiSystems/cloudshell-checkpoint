@@ -1,6 +1,7 @@
 from ipaddress import IPv4Address, IPv6Address
 
 from cloudshell.checkpoint.gaia.autoload.port_constants import PORT_NAME, PORT_DESCR_NAME, PORT_DESCRIPTION
+from cloudshell.snmp.core.domain.snmp_oid import SnmpMibObject
 
 
 class SnmpIfEntity(object):
@@ -19,19 +20,19 @@ class SnmpIfEntity(object):
     @property
     def if_name(self):
         if not self._if_name:
-            self._if_name = self._snmp.get_property(*PORT_NAME + (self.if_index, ))
+            self._if_name = self._snmp.get_property(SnmpMibObject(*PORT_NAME + (self.if_index, ))).safe_value
         return self._if_name
 
     @property
     def if_descr_name(self):
         if not self._if_descr_name:
-            self._if_descr_name = self._snmp.get_property(*PORT_DESCR_NAME + (self.if_index, ))
+            self._if_descr_name = self._snmp.get_property(SnmpMibObject(*PORT_DESCR_NAME + (self.if_index, ))).safe_value
         return self._if_descr_name
 
     @property
     def if_port_description(self):
         if not self._if_alias:
-            self._if_alias = self._snmp.get_property(*PORT_DESCRIPTION + (self.if_index,))
+            self._if_alias = self._snmp.get_property(SnmpMibObject(*PORT_DESCRIPTION + (self.if_index,))).safe_value
         return self._if_alias
 
     @property
@@ -51,9 +52,9 @@ class SnmpIfEntity(object):
         return self._ipv6
 
     def _get_ip(self):
-        self._ips_list = {x: y.get("ipAddressIfIndex")
-                          for x, y in self._port_attributes_snmp_tables.ip_mixed_dict.iteritems()
-                          if y.get("ipAddressIfIndex") == self.if_index}
+        self._ips_list = {x: y.get("ipAddressIfIndex").safe_value
+                          for x, y in self._port_attributes_snmp_tables.ip_mixed_dict.items()
+                          if y.get("ipAddressIfIndex").safe_value == self.if_index}
         for ip in self._ips_list:
             index = ip.replace("'", "")
             if index.startswith("ipv6"):

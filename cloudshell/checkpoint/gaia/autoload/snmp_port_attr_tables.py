@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from cloudshell.checkpoint.gaia.autoload import port_constants
+from cloudshell.snmp.core.domain.snmp_oid import SnmpMibObject
 
 
 class SnmpPortAttrTables(object):
@@ -20,14 +21,14 @@ class SnmpPortAttrTables(object):
     @property
     def lldp_remote_table(self):
         if self._lldp_remote_table is None:
-            self._lldp_remote_table = self._snmp.get_table(*port_constants.PORT_ADJACENT_REM_TABLE)
+            self._lldp_remote_table = self._snmp.get_table(SnmpMibObject(*port_constants.PORT_ADJACENT_REM_TABLE))
             self._logger.info('lldpRemSysName table loaded')
         return self._lldp_remote_table
 
     @property
     def lldp_local_table(self):
         if self._lldp_local_table is None:
-            lldp_local_table = self._snmp.get_table(*port_constants.PORT_ADJACENT_LOC_TABLE)
+            lldp_local_table = self._snmp.get_table(SnmpMibObject(*port_constants.PORT_ADJACENT_LOC_TABLE))
             if lldp_local_table:
                 self._lldp_local_table = dict(
                     [(str(v.get("lldpLocPortDesc", "")).lower(), k) for k, v in lldp_local_table.iteritems()])
@@ -39,35 +40,35 @@ class SnmpPortAttrTables(object):
     @property
     def duplex_table(self):
         if self._duplex_table is None:
-            self._duplex_table = self._snmp.get_table('EtherLike-MIB', 'dot3StatsIndex')
+            self._duplex_table = self._snmp.get_table(SnmpMibObject('EtherLike-MIB', 'dot3StatsIndex'))
             self._logger.info('dot3StatsIndex table loaded')
         return self._duplex_table
 
     @property
     def ip_v4_old_dict(self):
         if self._ip_v4_old_table is None:
-            self._ip_v4_old_table = self._snmp.get_table('IP-MIB', 'ipAdEntIfIndex')
+            self._ip_v4_old_table = self._snmp.get_table(SnmpMibObject('IP-MIB', 'ipAdEntIfIndex'))
             self._logger.info('ipAdEntIfIndex table loaded')
         return self._ip_v4_old_table
 
     @property
     def ip_mixed_dict(self):
         if self._ip_mixed_table is None:
-            self._ip_mixed_table = self._snmp.get_table('IP-MIB', 'ipAddressIfIndex')
+            self._ip_mixed_table = self._snmp.get_table(SnmpMibObject('IP-MIB', 'ipAddressIfIndex'))
             self._logger.info('ipAddressIfIndex table loaded')
         return self._ip_mixed_table
 
     @property
     def ip_v6_dict(self):
         if self._ip_v6_table is None:
-            self._ip_v6_table = self._snmp.get_table('IPV6-MIB', 'ipv6AddrType')
+            self._ip_v6_table = self._snmp.get_table(SnmpMibObject('IPV6-MIB', 'ipv6AddrType'))
             self._logger.info('ipv6IfDescr table loaded')
         return self._ip_v6_table
 
     @property
     def port_channel_ports(self):
         if self._port_channel_ports is None:
-            self._port_channel_ports = self._snmp.get_table('IEEE8023-LAG-MIB',
-                                                            'dot3adAggPortAttachedAggID')
+            self._port_channel_ports = self._snmp.get_table(SnmpMibObject('IEEE8023-LAG-MIB',
+                                                            'dot3adAggPortAttachedAggID'))
             self._logger.info('dot3adAggPortAttachedAggID table loaded')
         return self._port_channel_ports
