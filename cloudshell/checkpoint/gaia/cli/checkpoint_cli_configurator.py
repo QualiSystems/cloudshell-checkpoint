@@ -77,7 +77,7 @@ class CheckpointCliConfigurator(AbstractModeConfigurator):
     @property
     @lru_cache()
     def _session_dict(self):
-        return OrderedDict(super(CheckpointCliConfigurator, self)._session_dict.items()+[(
+        return OrderedDict(list(super(CheckpointCliConfigurator, self)._session_dict.items())+[(
             "console", [self._console_ssh_session, self._console_telnet_session])])
 
     def _on_session_start(self, session, logger):
