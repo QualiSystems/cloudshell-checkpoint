@@ -4,6 +4,7 @@ from cloudshell.checkpoint.gaia.autoload.snmp_if_port_channel_entity import Snmp
 from cloudshell.checkpoint.gaia.autoload.snmp_if_port_entity import SnmpIfPort
 from cloudshell.checkpoint.gaia.autoload.snmp_port_attr_tables import SnmpPortAttrTables
 from cloudshell.checkpoint.gaia.autoload import port_constants
+from cloudshell.snmp.core.domain.snmp_oid import SnmpMibObject
 
 
 class SnmpIfTable(object):
@@ -79,11 +80,11 @@ class SnmpIfTable(object):
         """
 
         self._logger.info('Start loading MIB tables:')
-        if_table = self._snmp.get_table(*port_constants.PORT_DESCR_NAME)
+        if_table = self._snmp.get_table(SnmpMibObject(*port_constants.PORT_DESCR_NAME))
         if not if_table:
-            if_table = self._snmp.get_table(*port_constants.PORT_NAME)
+            if_table = self._snmp.get_table(SnmpMibObject(*port_constants.PORT_NAME))
             if not if_table:
-                if_table = self._snmp.get_table(*port_constants.PORT_INDEX)
+                if_table = self._snmp.get_table(SnmpMibObject(*port_constants.PORT_INDEX))
         self._if_table = if_table.keys()
         self._logger.info('ifIndex table loaded')
 
