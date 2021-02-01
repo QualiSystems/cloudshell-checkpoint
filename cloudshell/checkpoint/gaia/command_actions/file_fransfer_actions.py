@@ -1,10 +1,11 @@
 from collections import OrderedDict
+from functools import lru_cache
 
-from backports.functools_lru_cache import lru_cache
-from cloudshell.cli.command_mode import CommandMode
+from cloudshell.cli.service.command_mode import CommandMode
+
 from cloudshell.cli.command_template.command_template import CommandTemplate
 from cloudshell.cli.command_template.command_template_executor import CommandTemplateExecutor
-from cloudshell.devices.networking_utils import UrlParser
+from cloudshell.shell.flows.utils.networking_utils import UrlParser
 
 
 class Url:
@@ -98,7 +99,9 @@ class FileTransferActions(object):
         """
         scp_actions = OrderedDict([(r"[Pp]assword:", lambda s, l: s.send_line(url_obj.password, l)),
                                    (r"\(yes\/no\)\?", lambda s, l: s.send_line("yes", l))])
-        scp_errors = OrderedDict([("[Nn]o such file or directory", "No such file or directory.")])
+        scp_errors = OrderedDict([("[Nn]o such file or directory", "No such file or directory."),
+                                  ("[Nn]ame or service not known", "Name or service not known"),
+                                  ("[Nn]etwork is unreachable", "Network is unreachable")])
         action_map and scp_actions.update(action_map)
         error_map and scp_errors.update(error_map)
 
