@@ -3,7 +3,8 @@ from collections import OrderedDict
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
 ERROR_MAP = OrderedDict([("Failed to maintain the lock", "Failed to maintain the lock."),
-                         ("Incomplete command", "Incomplete command.")])
+                         ("Incomplete command", "Incomplete command."),
+                         ("No such file or directory", "No such file or directory")])
 PASSWORD_ERROR_MAP = OrderedDict([
     ("must be at least", "Authentication pass phrase must be at least 8 characters"),
     ("not complex enough", "Password is not complex enough; try mixing more different kinds of characters "

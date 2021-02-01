@@ -133,7 +133,7 @@ class CheckpointSNMPAutoload(object):
             if not interface_name:
                 continue
 
-            port_object = resource_model.entities.Port(port.if_index)
+            port_object = resource_model.entities.Port(port.if_index, name=interface_name)
             # port_object = GenericPort(shell_name=self.shell_name,
             #                           name=interface_name.replace("/", "-"),
             #                           unique_id="{0}.{1}.{2}".format(self.resource_name, "port", port))
@@ -174,7 +174,7 @@ class CheckpointSNMPAutoload(object):
                     if_port_name = self.if_table.get_if_entity_by_index(port).if_name
                     associated_ports += if_port_name.replace('/', '-').replace(' ', '') + '; '
 
-                port_channel = resource_model.entities.PortChannel(interface_id)
+                port_channel = resource_model.entities.PortChannel(interface_id, name=if_port_channel.if_name)
                 port_channel.associated_ports = associated_ports.strip(' \t\n\r')
                 port_channel.port_description = if_port_channel.if_port_description
                 port_channel.ipv4_address = if_port_channel.ipv4_address
