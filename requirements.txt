@@ -1,4 +1,5 @@
-passlib
-backports.functools-lru-cache
-cloudshell-firewall>=3.0,<3.1
-cloudshell-networking-devices>=2.7,<2.8
+setuptools>=40.0
+cloudshell-shell-flows>=1.0,<2
+cloudshell-cli>=4.0,<5
+cloudshell-snmp>=4.0,<5
+passlib==1.7.4
