@@ -39,74 +39,7 @@ class CheckpointSNMPAutoload(object):
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "mibs"))
         self.snmp_service.add_mib_folder_path(path)
         self.logger.info("Loading mibs")
-        # self._snmp_service.load_mib_tables(
-        #     [
-        #         MIBS.JUNIPER_MIB,
-        #         MIBS.JUNIPER_IF_MIB,
-        #         MIBS.IF_MIB,
-        #         MIBS.LAG_MIB,
-        #         MIBS.IP_MIB,
-        #         MIBS.IPV6_MIB,
-        #         MIBS.LLDP_MIB,
-        #         MIBS.ETHERLIKE_MIB,
-        #     ]
-        # )
-        # self.snmp_service.update_mib_sources(path)
         self.snmp_service.load_mib_tables(["CHECKPOINT-MIB"])
-
-    # def discover(self, supported_os):
-    #     """General entry point for autoload,
-    #     read device structure and attributes: chassis, modules, submodules, ports, port-channels and power supplies
-    #
-    #     :return: AutoLoadDetails object
-    #     """
-    #
-    #     self.logger.info("*" * 70)
-    #     self.logger.info("Start SNMP discovery process .....")
-    #
-    #     self._get_device_details()
-    #
-    #     chassis = self._get_chassis_attributes(self.resource)
-    #     self._get_power_ports(chassis)
-    #     self._get_ports_attributes(chassis)
-    #     self._get_port_channels(self.resource)
-    #
-    #     autoload_details = AutoloadDetailsBuilder(self.resource).autoload_details()
-    #     self._log_autoload_details(autoload_details)
-    #     return autoload_details
-
-    # def _log_autoload_details(self, autoload_details):
-    #     """
-    #     Logging autoload details
-    #     :param autoload_details:
-    #     :return:
-    #     """
-    #     self.logger.debug("-------------------- <RESOURCES> ----------------------")
-    #     for resource in autoload_details.resources:
-    #         self.logger.debug(
-    #             "{0:15}, {1:20}, {2}".format(resource.relative_address, resource.name, resource.unique_identifier))
-    #     self.logger.debug("-------------------- </RESOURCES> ----------------------")
-    #
-    #     self.logger.debug("-------------------- <ATTRIBUTES> ---------------------")
-    #     for attribute in autoload_details.attributes:
-    #         self.logger.debug("-- {0:15}, {1:60}, {2}".format(attribute.relative_address, attribute.attribute_name,
-    #                                                           attribute.attribute_value))
-    #     self.logger.debug("-------------------- </ATTRIBUTES> ---------------------")
-    #
-    # def is_valid_device_os(self, supported_os):
-    #     """Validate device OS using snmp
-    #         :return: True or False
-    #     """
-    #
-    #     system_object_id = self.snmp_service.get_property('SNMPv2-MIB', 'sysObjectID', '0')
-    #     self.logger.debug('Detected system description: \'{0}\''.format(system_object_id))
-    #     if any([x for x in supported_os if x in system_object_id.lower()]):
-    #         return True
-    #     else:
-    #         error_message = 'Incompatible driver! Please use this driver for \'{0}\' operation system(s)'. \
-    #             format(str(tuple(supported_os)))
-    #         self.logger.error(error_message)
-    #         return False
 
     @property
     def device_info(self):
@@ -134,9 +67,6 @@ class CheckpointSNMPAutoload(object):
                 continue
 
             port_object = resource_model.entities.Port(port.if_index, name=interface_name)
-            # port_object = GenericPort(shell_name=self.shell_name,
-            #                           name=interface_name.replace("/", "-"),
-            #                           unique_id="{0}.{1}.{2}".format(self.resource_name, "port", port))
 
             port_object.port_description = port.if_port_description
             port_object.l2_protocol_type = port.if_type
@@ -200,9 +130,6 @@ class CheckpointSNMPAutoload(object):
         serial_number = self.snmp_service.get_property(SnmpMibObject('CHECKPOINT-MIB',
                                                                      "svnApplianceSerialNumber", chassis_id)).safe_value
         chassis_object = resource_model.entities.Chassis(chassis_id)
-        # chassis_object = GenericChassis(shell_name=self.shell_name,
-        #                                 name="Chassis {}".format(chassis_id),
-        #                                 unique_id="{}.{}.{}".format(self.resource_name, "chassis", serial_number))
         chassis_object.model = self.snmp_service.get_property(
             SnmpMibObject('CHECKPOINT-MIB', "svnApplianceProductName", chassis_id)).safe_value
         chassis_object.serial_number = serial_number
@@ -240,17 +167,11 @@ class CheckpointSNMPAutoload(object):
         pp_table = self.snmp_service.get_table(SnmpMibObject("CHECKPOINT-MIB", "powerSupplyTable"))
         chassis = chassis_table.get(self.CHASSIS_ID)
         for port_id in pp_table:
-            # relative_address = "PP{}".format(port)
-
             power_port = resource_model.entities.PowerPort(port_id)
 
-            # power_port = GenericPowerPort(shell_name=self.shell_name,
-            #                               name="PP{0}".format(port),
-            #                               unique_id="{0}.{1}.{2}".format(self.resource_name, "power_port", port))
             status = pp_table.get(port_id, {}).get("powerSupplyStatus", "")
             if status:
                 power_port.port_description = "Power port Status - " + status
-            # chassis.add_sub_resource(relative_address=relative_address, sub_resource=power_port)
             chassis.connect_power_port(power_port)
             power_port_table[port_id] = power_port
             self.logger.info("Added Power Port")
