@@ -101,7 +101,8 @@ class FileTransferActions(object):
                                    (r"\(yes\/no\)\?", lambda s, l: s.send_line("yes", l))])
         scp_errors = OrderedDict([("[Nn]o such file or directory", "No such file or directory."),
                                   ("[Nn]ame or service not known", "Name or service not known"),
-                                  ("[Nn]etwork is unreachable", "Network is unreachable")])
+                                  ("[Nn]etwork is unreachable", "Network is unreachable"),
+                                  ("[Pp]ermission denied", "Permission denied")])
         action_map and scp_actions.update(action_map)
         error_map and scp_errors.update(error_map)
 
