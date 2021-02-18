@@ -65,13 +65,13 @@ class ExpertCommandMode(CommandMode):
             self.ENTER_COMMAND,
             self.EXIT_COMMAND,
             enter_error_map={r"[Ww]rong\spassword": "Wrong password."},
-            enter_action_map={
-                "[Pp]assword":
-                    lambda session, logger: (session.send_line(self.resource_config.enable_password, logger),
-                                             session.send_line('\n', logger)),
-                # Raise an error action
-                r"[Ww]rong\spassword": lambda s, l: self._exception("Incorrect expert password.")
-            }
+            enter_action_map=OrderedDict([
+                # Raise the error in action map
+                (r"[Ww]rong\spassword", lambda s, l: self._exception("Incorrect Enable Password.")),
+                ("[Pp]assword",
+                 lambda session, logger: (session.send_line(self.resource_config.enable_password, logger),
+                                          session.send_line('\n', logger))),
+            ])
         )
 
     @staticmethod
