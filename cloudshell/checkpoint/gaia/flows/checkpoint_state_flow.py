@@ -12,7 +12,9 @@ class CheckpointStateFlow(StateFlow):
 
         with self._cli_configurator.config_mode_service() as cli_service:
             try:
-                return cli_service.send_command("shutdown -h now",
-                                                action_map={r"system is going down": exit_with_exception})
+                return cli_service.send_command(
+                    "shutdown -h now",
+                    action_map={r"system is going down": exit_with_exception},
+                )
             except ShutdownOkException:
                 return "Shutdown process is running"
