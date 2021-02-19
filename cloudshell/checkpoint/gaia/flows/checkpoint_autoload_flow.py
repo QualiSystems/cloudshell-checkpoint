@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 import re
 
-from cloudshell.checkpoint.gaia.autoload.checkpoint_gaia_snmp_autoload import CheckpointSNMPAutoload
 from cloudshell.shell.flows.autoload.basic_flow import AbstractAutoloadFlow
+
+from cloudshell.checkpoint.gaia.autoload.checkpoint_gaia_snmp_autoload import (
+    CheckpointSNMPAutoload,
+)
 
 
 class CheckpointSnmpAutoloadFlow(AbstractAutoloadFlow):

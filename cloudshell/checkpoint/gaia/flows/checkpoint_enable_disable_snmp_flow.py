@@ -1,5 +1,9 @@
-from cloudshell.checkpoint.gaia.command_actions.snmp_actions import SnmpV2Actions, SnmpV3Actions
 from cloudshell.snmp.snmp_configurator import EnableDisableSnmpFlowInterface
+
+from cloudshell.checkpoint.gaia.command_actions.snmp_actions import (
+    SnmpV2Actions,
+    SnmpV3Actions,
+)
 
 
 class CheckpointEnableDisableSnmpFlow(EnableDisableSnmpFlowInterface):
@@ -31,7 +35,7 @@ class CheckpointEnableDisableSnmpFlow(EnableDisableSnmpFlowInterface):
             disable_snmp_func(cli_service=cli_service, snmp_parameters=snmp_parameters)
 
     def _enable_snmp_v2(self, cli_service, snmp_parameters):
-        """
+        """Enable SNMPv2.
 
         :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
         :param cloudshell.snmp.snmp_parameters.SNMPReadParameters snmp_parameters:
@@ -47,13 +51,17 @@ class CheckpointEnableDisableSnmpFlow(EnableDisableSnmpFlowInterface):
         output += snmp_v2_actions.set_snmp_version()
 
         if snmp_parameters.is_read_only:
-            output += snmp_v2_actions.set_snmp_read_community(snmp_community=snmp_community)
+            output += snmp_v2_actions.set_snmp_read_community(
+                snmp_community=snmp_community
+            )
         else:
-            output += snmp_v2_actions.set_snmp_write_community(snmp_community=snmp_community)
+            output += snmp_v2_actions.set_snmp_write_community(
+                snmp_community=snmp_community
+            )
         return output
 
     def _enable_snmp_v3(self, cli_service, snmp_parameters):
-        """
+        """Enable SNMPv3.
 
         :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
         :param cloudshell.snmp.snmp_parameters.SNMPV3Parameters snmp_parameters:
@@ -63,16 +71,18 @@ class CheckpointEnableDisableSnmpFlow(EnableDisableSnmpFlowInterface):
         output = snmp_v3_actions.enable_snmp_agent()
         output += snmp_v3_actions.set_snmp_version()
 
-        output += snmp_v3_actions.add_snmp_user(snmp_user=snmp_parameters.snmp_user,
-                                                snmp_password=snmp_parameters.snmp_password,
-                                                snmp_priv_key=snmp_parameters.snmp_private_key,
-                                                snmp_auth_proto=snmp_parameters.snmp_auth_protocol,
-                                                snmp_priv_proto=snmp_parameters.snmp_private_key_protocol)
+        output += snmp_v3_actions.add_snmp_user(
+            snmp_user=snmp_parameters.snmp_user,
+            snmp_password=snmp_parameters.snmp_password,
+            snmp_priv_key=snmp_parameters.snmp_private_key,
+            snmp_auth_proto=snmp_parameters.snmp_auth_protocol,
+            snmp_priv_proto=snmp_parameters.snmp_private_key_protocol,
+        )
 
         return output
 
     def _disable_snmp_v2(self, cli_service, snmp_parameters):
-        """
+        """Disable SNMPv2.
 
         :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
         :param cloudshell.snmp.snmp_parameters.SNMPReadParameters snmp_parameters:
@@ -91,7 +101,7 @@ class CheckpointEnableDisableSnmpFlow(EnableDisableSnmpFlowInterface):
         return output
 
     def _disable_snmp_v3(self, cli_service, snmp_parameters):
-        """
+        """Disable SNMPv3.
 
         :param cloudshell.cli.cli_service_impl.CliServiceImpl cli_service:
         :param cloudshell.snmp.snmp_parameters.SNMPV3Parameters snmp_parameters:

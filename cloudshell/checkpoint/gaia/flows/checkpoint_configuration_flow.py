@@ -1,13 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import FileTransferActions, Url
-from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import SaveRestoreActions
 from cloudshell.shell.flows.configuration.basic_flow import AbstractConfigurationFlow
+
+from cloudshell.checkpoint.gaia.command_actions.file_fransfer_actions import (
+    FileTransferActions,
+    Url,
+)
+from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import (
+    SaveRestoreActions,
+)
 
 
 class CheckpointConfigurationFlow(AbstractConfigurationFlow):
-
     def __init__(self, logger, resource_config, cli_configurator):
         super(CheckpointConfigurationFlow, self).__init__(logger, resource_config)
         self._cli_configurator = cli_configurator
@@ -33,7 +38,9 @@ class CheckpointConfigurationFlow(AbstractConfigurationFlow):
                     # remove local file
                     save_restore_actions.remove_local_file(url_obj.filename)
 
-    def _restore_flow(self, path, configuration_type, restore_method, vrf_management_name):
+    def _restore_flow(
+        self, path, configuration_type, restore_method, vrf_management_name
+    ):
         with self._cli_configurator.enable_mode_service() as cli_service:
             save_restore_actions = SaveRestoreActions(cli_service, self._logger)
             file_transfer_actions = FileTransferActions(cli_service, self._logger)
