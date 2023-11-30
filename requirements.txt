@@ -1,5 +1,10 @@
-setuptools>=40.0
-cloudshell-shell-flows>=1.0,<2
-cloudshell-cli>=4.0,<5
-cloudshell-snmp>=4.0,<5
 passlib==1.7.4
+cloudshell-shell-core~=6.0
+cloudshell-shell-standards~=2.0
+cloudshell-shell-flows~=3.0
+cloudshell-shell-connectivity-flow~=4.0
+cloudshell-cli~=5.0
+cloudshell-snmp~=5.0
+cloudshell-snmp-autoload~=2.0
+attrs>=22,<24
+typing-extensions>=4.4

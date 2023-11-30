@@ -1,55 +1,64 @@
+from __future__ import annotations
+
+from attrs import define
+from typing import TYPE_CHECKING
+
 from cloudshell.cli.command_template.command_template_executor import (
     CommandTemplateExecutor,
 )
+from cloudshell.checkpoint.gaia.command_templates import save_restore_templates
 
-import cloudshell.checkpoint.gaia.command_templates.save_restore_templates as command_templates  # noqa: E501
+if TYPE_CHECKING:
+    from cloudshell.cli.service.cli_service import CliService
 
 
-class SaveRestoreActions(object):
-    def __init__(self, cli_service, logger):
-        """Save restore actions.
+@define
+class SaveRestoreActions:
+    _cli_service: CliService
 
-        :param cli_service: config mode cli service
-        :type cli_service: CliService
-        :param logger:
-        :type logger: Logger
-        :return:
-        """
-        self._cli_service = cli_service
-        self._logger = logger
-
-    def save_local(self, filename, action_map=None, error_map=None):
+    def save_local(
+        self,
+        filename: str,
+        action_map: dict = None,
+        error_map: dict = None
+    ) -> str:
+        """Save configuration to local file."""
         return CommandTemplateExecutor(
             cli_service=self._cli_service,
-            command_template=command_templates.SAVE_CONFIGURATION,
+            command_template=save_restore_templates.SAVE_CONFIGURATION,
             action_map=action_map,
             error_map=error_map,
             timeout=300,
         ).execute_command(filename=filename)
 
-    def remove_local_file(self, filepath):
+    def remove_local_file(self, filepath: str) -> str:
+        """Remove local file."""
         return CommandTemplateExecutor(
-            cli_service=self._cli_service, command_template=command_templates.REMOVE
+            cli_service=self._cli_service, command_template=save_restore_templates.REMOVE
         ).execute_command(filename=filepath)
 
-    def restore(self, filepath):
+    def restore(self, filepath: str) -> str:
+        """Restore configuration from local file."""
         out = ""
         out += CommandTemplateExecutor(
             cli_service=self._cli_service,
-            command_template=command_templates.ON_FAILURE_CONTINUE,
+            command_template=save_restore_templates.ON_FAILURE_CONTINUE,
         ).execute_command()
+
         out += CommandTemplateExecutor(
             cli_service=self._cli_service,
-            command_template=command_templates.LOAD_CONFIGURATION,
+            command_template=save_restore_templates.LOAD_CONFIGURATION,
             timeout=300,
         ).execute_command(filename=filepath)
+
         out += CommandTemplateExecutor(
             cli_service=self._cli_service,
-            command_template=command_templates.ON_FAILURE_STOP,
+            command_template=save_restore_templates.ON_FAILURE_STOP,
         ).execute_command()
+
         out += CommandTemplateExecutor(
             cli_service=self._cli_service,
-            command_template=command_templates.SAVE_CONFIG,
+            command_template=save_restore_templates.SAVE_CONFIG,
         ).execute_command()
 
         return out

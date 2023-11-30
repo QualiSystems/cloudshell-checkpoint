@@ -1,9 +1,20 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-from collections import OrderedDict
-from functools import lru_cache
+from __future__ import annotations
+
+import logging
+from collections.abc import Collection
+from typing import TYPE_CHECKING, ClassVar
+
+from attrs import define, field
+from typing_extensions import Self
 
 from cloudshell.cli.configurator import AbstractModeConfigurator
+
+from cloudshell.cli.factory.session_factory import (
+    CloudInfoAccessKeySessionFactory,
+    ConsoleSessionFactory,
+    GenericSessionFactory,
+    SessionFactory,
+)
 from cloudshell.cli.service.command_mode_helper import CommandModeHelper
 
 from cloudshell.checkpoint.gaia.cli.checkpoint_command_modes import (
@@ -11,25 +22,46 @@ from cloudshell.checkpoint.gaia.cli.checkpoint_command_modes import (
     ExpertCommandMode,
     MaintenanceCommandMode,
 )
-from cloudshell.checkpoint.gaia.cli.sessions.console_ssh_session import (
-    ConsoleSSHSession,
-)
-from cloudshell.checkpoint.gaia.cli.sessions.console_telnet_session import (
-    ConsoleTelnetSession,
-)
+from cloudshell.cli.session.console_ssh import ConsoleSSHSession
+from cloudshell.cli.session.console_telnet import ConsoleTelnetSession
+from cloudshell.cli.session.ssh_session import SSHSession
+from cloudshell.cli.session.telnet_session import TelnetSession
+
+if TYPE_CHECKING:
+    from cloudshell.cli.service.cli import CLI
+    from cloudshell.cli.types import T_COMMAND_MODE_RELATIONS, CliConfigProtocol
 
 
+@define
 class CheckpointCliConfigurator(AbstractModeConfigurator):
-    def __init__(self, cli, resource_config, logger):
-        """Checkpoint cli configurator.
+    REGISTERED_SESSIONS: ClassVar[tuple[SessionFactory]] = (
+        CloudInfoAccessKeySessionFactory(SSHSession),
+        GenericSessionFactory(TelnetSession),
+        ConsoleSessionFactory(ConsoleSSHSession),
+        ConsoleSessionFactory(
+            ConsoleTelnetSession, session_kwargs={"start_with_new_line": False}
+        ),
+        ConsoleSessionFactory(
+            ConsoleTelnetSession, session_kwargs={"start_with_new_line": True}
+        ),
+    )
+    modes: T_COMMAND_MODE_RELATIONS = field(init=False)
 
-        :param cloudshell.cli.service.cli.CLI cli:
-        :param cloudshell.shell.standards.firewall.resource_config.
-        FirewallResourceConfig resource_config:
-        :param logging.logger logger:
-        """
-        super(CheckpointCliConfigurator, self).__init__(resource_config, logger, cli)
-        self.modes = CommandModeHelper.create_command_mode(resource_config)
+    def __attrs_post_init__(self):
+        super().__attrs_post_init__()
+        self.modes = CommandModeHelper.create_command_mode(self._auth)
+
+    @classmethod
+    def from_config(
+        cls,
+        conf: CliConfigProtocol,
+        logger: logging.Logger | None = None,
+        cli: CLI | None = None,
+        registered_sessions: Collection[SessionFactory] | None = None,
+    ) -> Self:
+        if not logger:
+            logger = logging.getLogger(__name__)
+        return super().from_config(conf, logger, cli, registered_sessions)
 
     @property
     def default_mode(self):
@@ -43,48 +75,6 @@ class CheckpointCliConfigurator(AbstractModeConfigurator):
     def config_mode(self):
         return self.modes[ExpertCommandMode]
 
-    def _console_ssh_session(self, **kwargs):
-        console_port = int(self.resource_config.console_port)
-        session = ConsoleSSHSession(
-            self.resource_config.console_server_ip_address,
-            self.username,
-            self.password,
-            console_port,
-            self.on_session_start,
-        )
-        return session
-
-    def _console_telnet_session(self, **kwargs):
-        console_port = int(self.resource_config.console_port)
-        return [
-            ConsoleTelnetSession(
-                self.resource_config.console_server_ip_address,
-                self.username,
-                self.password,
-                console_port,
-                self.on_session_start,
-            ),
-            ConsoleTelnetSession(
-                self.resource_config.console_server_ip_address,
-                self.username,
-                self.password,
-                console_port,
-                self.on_session_start,
-                start_with_new_line=True,
-            ),
-        ]
-
-    @property
-    @lru_cache()
-    def _session_dict(self):
-        return OrderedDict(
-            list(super(CheckpointCliConfigurator, self)._session_dict.items())
-            + [("console", [self._console_ssh_session, self._console_telnet_session])]
-        )
-
     def _on_session_start(self, session, logger):
-        """Send default commands to configure/clear session outputs.
-
-        :return:
-        """
+        """Send default commands to configure/clear session outputs."""
         session.send_line("set clienv rows 0", logger)

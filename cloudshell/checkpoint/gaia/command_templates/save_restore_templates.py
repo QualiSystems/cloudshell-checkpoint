@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from __future__ import annotations
 
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
@@ -6,14 +6,9 @@ from cloudshell.checkpoint.gaia.command_templates.snmp_configuration_templates i
     ERROR_MAP,
 )
 
-LOCK_ACTION_MAP = OrderedDict(
-    [
-        (
-            r"Configuration lock present",
-            lambda s, l: s.send_line("lock database override", l),
-        )
-    ]
-)
+LOCK_ACTION_MAP = {
+    r"Configuration lock present": lambda s, l: s.send_line("lock database override", l)
+}
 
 # Restore
 ON_FAILURE_CONTINUE = CommandTemplate(

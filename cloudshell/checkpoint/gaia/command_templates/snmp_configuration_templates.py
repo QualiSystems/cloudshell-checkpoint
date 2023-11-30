@@ -1,5 +1,4 @@
-from collections import OrderedDict
-from itertools import chain
+from __future__ import annotations
 
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
@@ -8,15 +7,15 @@ from cloudshell.checkpoint.gaia.command_templates.error_map import (
     PASSWORD_ERROR_MAP,
 )
 
-SNMP_ERROR_MAP = OrderedDict(
-    [
-        (
-            "does not accept community strings",
-            "SNMP v3-Only does not accept community strings.",
-        ),
-    ]
-)
-ERROR_MAP = OrderedDict(chain(BASIC_ERRORS.items(), SNMP_ERROR_MAP.items()))
+SNMP_ERROR_MAP = {
+    "does not accept community strings":
+        "SNMP v3-Only does not accept community strings."
+}
+
+ERROR_MAP = BASIC_ERRORS | SNMP_ERROR_MAP
+SNMP_PASSWORD_ERROR_MAP = BASIC_ERRORS | PASSWORD_ERROR_MAP
+
+
 ENABLE_SNMP_AGENT = CommandTemplate("set snmp agent on", error_map=ERROR_MAP)
 DISABLE_SNMP_AGENT = CommandTemplate("set snmp agent off", error_map=ERROR_MAP)
 SET_SNMP_VERSION = CommandTemplate(
@@ -27,10 +26,6 @@ SET_RO_SNMP_COMMUNITY = CommandTemplate(
 )
 SET_RW_SNMP_COMMUNITY = CommandTemplate(
     "set snmp community {name} read-write", error_map=ERROR_MAP
-)
-
-SNMP_PASSWORD_ERROR_MAP = OrderedDict(
-    chain(BASIC_ERRORS.items(), PASSWORD_ERROR_MAP.items())
 )
 
 SET_V3_SNMP_USER_NO_PRIV = CommandTemplate(
