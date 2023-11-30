@@ -9,12 +9,10 @@ from cloudshell.shell.flows.configuration.basic_flow import (
     RestoreMethod,
 )
 
-from cloudshell.checkpoint.gaia.command_actions.system_actions import (
-    SystemActions,
-)
 from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import (
     SaveRestoreActions,
 )
+from cloudshell.checkpoint.gaia.command_actions.system_actions import SystemActions
 
 if TYPE_CHECKING:
     from typing import Union
@@ -23,6 +21,7 @@ if TYPE_CHECKING:
     from cloudshell.shell.standards.firewall.resource_config import (
         FirewallResourceConfig,
     )
+
     from ..cli.checkpoint_cli_configurator import CheckpointCliConfigurator
 
     Url = Union[RemoteURL, BasicLocalUrl]
@@ -72,7 +71,6 @@ class CheckpointConfigurationFlow(AbstractConfigurationFlow):
                 with enable_cli_service.enter_mode(self.cli_configurator.config_mode):
                     # Transfer config to remote
                     try:
-                        # file_transfer_actions.upload(url_obj.filename, folder_path)
                         system_actions.upload(file_dst_url)
                     finally:
                         # remove local file
@@ -103,7 +101,6 @@ class CheckpointConfigurationFlow(AbstractConfigurationFlow):
 
             if config_path.scheme != self.file_system:
                 with enable_cli_service.enter_mode(self.cli_configurator.config_mode):
-                    # file_transfer_actions.download(path, url_obj.filename)
                     system_actions.download(config_path)
 
             # restore local

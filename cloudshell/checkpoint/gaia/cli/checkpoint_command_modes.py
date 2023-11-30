@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import random
 import re
+from typing import TYPE_CHECKING
 
 from passlib.hash import md5_crypt
-from typing import TYPE_CHECKING
 
 from cloudshell.cli.service.command_mode import CommandMode
 
 if TYPE_CHECKING:
     from logging import Logger
 
-    from cloudshell.cli.service.cli_service import CliService
     from cloudshell.cli.service.auth_model import Auth
+    from cloudshell.cli.service.cli_service import CliService
 
 
 class MaintenanceCommandMode(CommandMode):
@@ -27,7 +27,7 @@ class MaintenanceCommandMode(CommandMode):
             self,
             MaintenanceCommandMode.PROMPT,
             MaintenanceCommandMode.ENTER_COMMAND,
-            MaintenanceCommandMode.EXIT_COMMAND
+            MaintenanceCommandMode.EXIT_COMMAND,
         )
 
 
@@ -46,7 +46,7 @@ class EnableCommandMode(CommandMode):
             self,
             EnableCommandMode.PROMPT,
             EnableCommandMode.ENTER_COMMAND,
-            EnableCommandMode.EXIT_COMMAND
+            EnableCommandMode.EXIT_COMMAND,
         )
 
 
@@ -65,14 +65,14 @@ class ExpertCommandMode(CommandMode):
             ExpertCommandMode.EXIT_COMMAND,
             enter_error_map={r"[Ww]rong\spassword": "Wrong password."},
             enter_action_map={
-                r"[Ww]rong\spassword":
-                    lambda s, l: self._exception("Incorrect Enable Password."),
-                "[Pp]assword":
-                    lambda session, logger: (
-                        session.send_line(self._auth.enable_password, logger),
-                        session.send_line("\n", logger),
-                    )
-            }
+                r"[Ww]rong\spassword": lambda s, l: self._exception(
+                    "Incorrect Enable Password."
+                ),
+                "[Pp]assword": lambda session, logger: (
+                    session.send_line(self._auth.enable_password, logger),
+                    session.send_line("\n", logger),
+                ),
+            },
         )
 
     @staticmethod
@@ -98,14 +98,13 @@ class ExpertCommandMode(CommandMode):
         """Set expert password."""
         # gen enable password hash
         enable_password_hash = md5_crypt.hash(
-            self._auth.enable_password,
-            salt_size=random.choice(range(5, 8))
+            self._auth.enable_password, salt_size=random.choice(range(5, 8))
         )
 
         error_map = {
             "Configuration lock present": "Configuration lock present.",
             "Failed to maintain the lock": "Failed to maintain the lock.",
-            "Wrong password": "Wrong password."
+            "Wrong password": "Wrong password.",
         }
         cli_service.send_command(
             command=f"set expert-password-hash {enable_password_hash}",
@@ -116,13 +115,9 @@ class ExpertCommandMode(CommandMode):
     def step_up(self, cli_service: CliService, logger: Logger) -> None:
         if not self._expert_password_defined(cli_service, logger):
             self._set_expert_password(cli_service, logger)
-        super(ExpertCommandMode, self).step_up(cli_service, logger)
+        super().step_up(cli_service, logger)
 
 
 CommandMode.RELATIONS_DICT = {
-    MaintenanceCommandMode: {
-        EnableCommandMode: {
-            ExpertCommandMode: {}
-        }
-    }
+    MaintenanceCommandMode: {EnableCommandMode: {ExpertCommandMode: {}}}
 }

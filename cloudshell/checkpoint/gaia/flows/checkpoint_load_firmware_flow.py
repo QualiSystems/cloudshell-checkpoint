@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from cloudshell.shell.flows.firmware.basic_flow import AbstractFirmwareFlow
-from cloudshell.checkpoint.gaia.helpers.errors import NotImplementedCheckpointError
 
+from cloudshell.checkpoint.gaia.helpers.errors import NotImplementedCheckpointError
 
 if TYPE_CHECKING:
     from typing import Union

@@ -8,7 +8,6 @@ from attrs import define, field
 from typing_extensions import Self
 
 from cloudshell.cli.configurator import AbstractModeConfigurator
-
 from cloudshell.cli.factory.session_factory import (
     CloudInfoAccessKeySessionFactory,
     ConsoleSessionFactory,
@@ -16,16 +15,16 @@ from cloudshell.cli.factory.session_factory import (
     SessionFactory,
 )
 from cloudshell.cli.service.command_mode_helper import CommandModeHelper
+from cloudshell.cli.session.console_ssh import ConsoleSSHSession
+from cloudshell.cli.session.console_telnet import ConsoleTelnetSession
+from cloudshell.cli.session.ssh_session import SSHSession
+from cloudshell.cli.session.telnet_session import TelnetSession
 
 from cloudshell.checkpoint.gaia.cli.checkpoint_command_modes import (
     EnableCommandMode,
     ExpertCommandMode,
     MaintenanceCommandMode,
 )
-from cloudshell.cli.session.console_ssh import ConsoleSSHSession
-from cloudshell.cli.session.console_telnet import ConsoleTelnetSession
-from cloudshell.cli.session.ssh_session import SSHSession
-from cloudshell.cli.session.telnet_session import TelnetSession
 
 if TYPE_CHECKING:
     from cloudshell.cli.service.cli import CLI

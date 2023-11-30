@@ -5,7 +5,6 @@ from cloudshell.snmp.core.domain.snmp_oid import SnmpMibObject
 
 
 class CheckpointSNMPSystemInfo(SnmpSystemInfo):
-
     def _get_device_model(self):
         """Get device model from the SNMPv2 mib."""
         result = self._get_val(
@@ -41,7 +40,6 @@ class CheckpointSNMPSystemInfo(SnmpSystemInfo):
 
     def is_valid_device_os(self, supported_os: list[str]) -> bool:
         """Validate device OS using snmp."""
-
         if not SnmpSystemInfo.is_valid_device_os(self, supported_os=supported_os):
             # Check is vendor equal Checkpoint
             return self._get_vendor().lower() == "checkpoint"

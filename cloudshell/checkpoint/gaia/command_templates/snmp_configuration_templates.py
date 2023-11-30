@@ -8,8 +8,7 @@ from cloudshell.checkpoint.gaia.command_templates.error_map import (
 )
 
 SNMP_ERROR_MAP = {
-    "does not accept community strings":
-        "SNMP v3-Only does not accept community strings."
+    "does not accept community strings": "SNMP v3-Only does not accept community strings."  # noqa E501
 }
 
 ERROR_MAP = BASIC_ERRORS | SNMP_ERROR_MAP

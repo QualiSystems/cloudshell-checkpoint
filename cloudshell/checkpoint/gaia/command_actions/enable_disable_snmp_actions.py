@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from attrs import define
 from typing import TYPE_CHECKING, ClassVar
+
+from attrs import define
 
 from cloudshell.cli.command_template.command_template_executor import (
     CommandTemplateExecutor,
 )
-from cloudshell.checkpoint.gaia.command_templates import snmp_configuration_templates
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
+
+from cloudshell.checkpoint.gaia.command_templates import snmp_configuration_templates
 
 if TYPE_CHECKING:
     from cloudshell.cli.service.cli_service import CliService
@@ -27,7 +29,9 @@ class BaseSnmpActions:
             error_map=error_map,
         ).execute_command()
 
-    def disable_snmp_agent(self, action_map: dict = None, error_map: dict = None) -> str:
+    def disable_snmp_agent(
+        self, action_map: dict = None, error_map: dict = None
+    ) -> str:
         """Disable snmp."""
         return CommandTemplateExecutor(
             cli_service=self._cli_service,
@@ -101,7 +105,8 @@ class EnableDisableSnmpV3Actions(BaseSnmpActions):
         except KeyError:
             raise Exception(
                 f"Authentication protocol "
-                f"{snmp_params.snmp_auth_protocol} is not supported.")
+                f"{snmp_params.snmp_auth_protocol} is not supported."
+            )
 
         try:
             priv_encrypt_protocol = self.PRIV_PROTOCOL_MAP[

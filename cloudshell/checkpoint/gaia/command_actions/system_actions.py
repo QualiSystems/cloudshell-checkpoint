@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import logging
-from attrs import define
 from typing import TYPE_CHECKING
 
-from cloudshell.cli.service.command_mode import CommandMode
+from attrs import define
+
 from cloudshell.cli.command_template.command_template_executor import (
     CommandTemplateExecutor,
 )
+from cloudshell.cli.service.command_mode import CommandMode
+
 from cloudshell.checkpoint.gaia.command_templates import system_templates
 from cloudshell.checkpoint.gaia.helpers.errors import (
+    NotSupportedCheckpointError,
     ShutdownOkCheckpointError,
-    NotSupportedCheckpointError
 )
 
 if TYPE_CHECKING:
@@ -35,7 +37,7 @@ class SystemActions:
             return "Shutdown process is running"
 
     def _get_transfer_obj(self, protocol: str):
-        """"""
+        """Determine transfer protocol."""
         protocol_mapping = {
             "scp": ScpFileTransfer,
             "ftp": FtpFileTransfer,
@@ -67,11 +69,11 @@ class ScpFileTransfer:
         return CommandTemplateExecutor(
             cli_service=self._cli_service,
             command_template=system_templates.SCP_COPY,
-            action_map=self._action_map(remote_url=remote_url)
+            action_map=self._action_map(remote_url=remote_url),
         ).execute_command(
             scp_port=remote_url.port or "22",
             src_location=remote_url.filename,
-            dst_location=self._get_scp_endpoint(remote_url=remote_url)
+            dst_location=self._get_scp_endpoint(remote_url=remote_url),
         )
 
     def download(self, remote_url: RemoteURL):
@@ -79,11 +81,11 @@ class ScpFileTransfer:
         return CommandTemplateExecutor(
             cli_service=self._cli_service,
             command_template=system_templates.SCP_COPY,
-            action_map=self._action_map(remote_url=remote_url)
+            action_map=self._action_map(remote_url=remote_url),
         ).execute_command(
             scp_port=remote_url.port or "22",
             src_location=self._get_scp_endpoint(remote_url=remote_url),
-            dst_location=remote_url.filename
+            dst_location=remote_url.filename,
         )
 
     @staticmethod
@@ -141,13 +143,13 @@ class FtpFileTransfer:
             enter_command=f"ftp {remote_url.host} {remote_url.port or '21'}",
             exit_command="exit",
             enter_action_map={
-                r"[Nn]ame|[Uu]sername|[Ll]ogin.*:":
-                lambda s, l: s.send_line(remote_url.username, l),
+                r"[Nn]ame|[Uu]sername|[Ll]ogin.*:": lambda s, l: s.send_line(
+                    remote_url.username, l
+                ),
                 r"[Pp]assword.*:": lambda s, l: s.send_line(remote_url.password, l),
             },
             enter_error_map={
                 r"[Ll]ogin incorrect|failed": "Login or Password is not correct.",
-                r"[Cc]onnection timed out|[Nn]ot connected":
-                    "Cannot connect to ftp host."
+                r"[Cc]onnection timed out|[Nn]ot connected": "Cannot connect to ftp host.",  # noqa E501
             },
         )
