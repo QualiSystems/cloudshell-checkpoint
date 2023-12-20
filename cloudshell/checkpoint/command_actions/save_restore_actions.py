@@ -8,7 +8,7 @@ from cloudshell.cli.command_template.command_template_executor import (
     CommandTemplateExecutor,
 )
 
-from cloudshell.checkpoint.gaia.command_templates import save_restore_templates
+from cloudshell.checkpoint.command_templates import save_restore_templates
 
 if TYPE_CHECKING:
     from cloudshell.cli.service.cli_service import CliService

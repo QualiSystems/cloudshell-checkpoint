@@ -10,8 +10,8 @@ from cloudshell.cli.command_template.command_template_executor import (
 )
 from cloudshell.cli.service.command_mode import CommandMode
 
-from cloudshell.checkpoint.gaia.command_templates import system_templates
-from cloudshell.checkpoint.gaia.helpers.errors import (
+from cloudshell.checkpoint.command_templates import system_templates
+from cloudshell.checkpoint.helpers.errors import (
     NotSupportedCheckpointError,
     ShutdownOkCheckpointError,
 )

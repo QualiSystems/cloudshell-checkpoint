@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
-from cloudshell.checkpoint.gaia.command_templates.snmp_configuration_templates import (
+from cloudshell.checkpoint.command_templates.snmp_configuration_templates import (
     ERROR_MAP,
 )
 

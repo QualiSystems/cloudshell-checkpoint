@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 
 from cloudshell.snmp.autoload.generic_snmp_autoload import GenericSNMPAutoload
 
-from cloudshell.checkpoint.gaia.autoload.checkpoint_snmp_port_table import (
+from cloudshell.checkpoint.autoload.checkpoint_snmp_port_table import (
     CheckpointPortsTable,
 )
-from cloudshell.checkpoint.gaia.autoload.checkpoint_snmp_system_info import (
+from cloudshell.checkpoint.autoload.checkpoint_snmp_system_info import (
     CheckpointSNMPSystemInfo,
 )
 

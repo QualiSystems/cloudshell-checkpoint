@@ -9,7 +9,7 @@ from cloudshell.cli.command_template.command_template_executor import (
 )
 from cloudshell.snmp.snmp_parameters import SNMPV3Parameters
 
-from cloudshell.checkpoint.gaia.command_templates import snmp_configuration_templates
+from cloudshell.checkpoint.command_templates import snmp_configuration_templates
 
 if TYPE_CHECKING:
     from cloudshell.cli.service.cli_service import CliService

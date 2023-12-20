@@ -20,7 +20,7 @@ from cloudshell.cli.session.console_telnet import ConsoleTelnetSession
 from cloudshell.cli.session.ssh_session import SSHSession
 from cloudshell.cli.session.telnet_session import TelnetSession
 
-from cloudshell.checkpoint.gaia.cli.checkpoint_command_modes import (
+from cloudshell.checkpoint.cli.checkpoint_command_modes import (
     EnableCommandMode,
     ExpertCommandMode,
     MaintenanceCommandMode,

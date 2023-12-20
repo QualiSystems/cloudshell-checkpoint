@@ -6,11 +6,11 @@ from attrs import define
 
 from cloudshell.snmp.snmp_configurator import EnableDisableSnmpFlowInterface
 
-from cloudshell.checkpoint.gaia.command_actions.enable_disable_snmp_actions import (  # noqa: E501
+from cloudshell.checkpoint.command_actions.enable_disable_snmp_actions import (  # noqa: E501
     EnableDisableSnmpV2Actions,
     EnableDisableSnmpV3Actions,
 )
-from cloudshell.checkpoint.gaia.helpers.errors import SnmpCheckpointError
+from cloudshell.checkpoint.helpers.errors import SnmpCheckpointError
 
 if TYPE_CHECKING:
     from typing import Union

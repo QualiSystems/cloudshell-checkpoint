@@ -9,10 +9,10 @@ from cloudshell.shell.flows.configuration.basic_flow import (
     RestoreMethod,
 )
 
-from cloudshell.checkpoint.gaia.command_actions.save_restore_actions import (
+from cloudshell.checkpoint.command_actions.save_restore_actions import (
     SaveRestoreActions,
 )
-from cloudshell.checkpoint.gaia.command_actions.system_actions import SystemActions
+from cloudshell.checkpoint.command_actions.system_actions import SystemActions
 
 if TYPE_CHECKING:
     from typing import Union

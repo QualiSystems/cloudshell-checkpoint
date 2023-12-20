@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
-from cloudshell.checkpoint.gaia.helpers.errors import ShutdownOkCheckpointError
+from cloudshell.checkpoint.helpers.errors import ShutdownOkCheckpointError
 
 SCP_ERROR_MAP = {
     "[Nn]o such file or directory": "No such file or directory.",

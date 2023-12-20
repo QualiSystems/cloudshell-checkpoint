@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from cloudshell.cli.command_template.command_template import CommandTemplate
 
-from cloudshell.checkpoint.gaia.command_templates.error_map import (
+from cloudshell.checkpoint.command_templates.error_map import (
     BASIC_ERRORS,
     PASSWORD_ERROR_MAP,
 )
