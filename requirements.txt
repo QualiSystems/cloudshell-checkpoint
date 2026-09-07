@@ -1,5 +1,6 @@
 setuptools>=40.0
 cloudshell-shell-flows>=1.0,<2
 cloudshell-cli>=4.0,<5
-cloudshell-snmp>=4.0,<5
+cloudshell-snmp>=6.0,<7.0
 passlib==1.7.4
+standard-telnetlib>=3.13; python_version >= "3.13"

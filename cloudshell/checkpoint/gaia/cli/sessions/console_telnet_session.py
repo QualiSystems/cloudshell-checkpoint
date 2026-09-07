@@ -54,9 +54,9 @@ class ConsoleTelnetSession(TelnetSession):
         self._handler.get_socket().send(telnetlib.IAC + telnetlib.WILL + telnetlib.ECHO)
 
         action_map = OrderedDict()
-        action_map[
-            "[Ll]ogin:|[Uu]ser:|[Uu]sername:"
-        ] = lambda session, logger: session.send_line(session.username, logger)
+        action_map["[Ll]ogin:|[Uu]ser:|[Uu]sername:"] = (
+            lambda session, logger: session.send_line(session.username, logger)
+        )
         action_map["[Pp]assword:"] = lambda session, logger: session.send_line(
             session.password, logger
         )
